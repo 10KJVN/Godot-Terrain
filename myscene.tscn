@@ -1,6 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://c5acgxyhs4xcn"]
+[gd_scene load_steps=6 format=3 uid="uid://c5acgxyhs4xcn"]
 
 [ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="1_1kw2x"]
+[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_fdx5o"]
+
+[sub_resource type="Environment" id="Environment_1kw2x"]
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_fdx5o"]
 resource_local_to_scene = false
@@ -11,9 +14,9 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("1_1kw2x")
 regenerate = false
-side_length = 200
+side_length = 256
 mesh_scale = 1.0
-wireframe = false
+wireframe = true
 noise_seed = 0
 zoom = 100.0
 offset = Vector3(0, 0, 0)
@@ -36,11 +39,13 @@ metadata/_custom_type_script = "uid://7n58awc2ols0"
 [sub_resource type="Compositor" id="Compositor_w1s2y"]
 compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_fdx5o")])
 
-[node name="Node3D" type="Node3D"]
+[node name="Root" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("1_fdx5o")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1kw2x")
 compositor = SubResource("Compositor_w1s2y")
