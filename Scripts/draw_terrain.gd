@@ -117,15 +117,43 @@ func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
 	var shader_spirv : RDShaderSPIRV = rd.shader_compile_spirv_from_source(src)
 	
 	var err = shader_spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_VERTEX)
-	if err: push_error(err)
+	if err != "":
+		push_error(err)
+		return RID() # fail
+	
 	err = shader_spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_FRAGMENT)
-	if err: push_error(err)
+	if err != "": 
+		push_error(err)
+		return RID() # fail
 	
 	var shader : RID = rd.shader_create_from_spirv(shader_spirv)
 	
 	return shader
 
 func initialize_render(framebuffer_format : int):
+	
+	var new_shader = compile_shader(source_vertex, source_fragment)
+	
+	if new_shader.is_valid():
+		if p_shader.is_valid():
+			rd.free_rid(p_shader)
+		p_shader = new_shader
+	else:
+		push_error("Shader compilation failed, not replacing old shader")
+	
+	if new_shader.is_valid():
+		if p_wire_shader.is_valid():
+			rd.free_rid(p_wire_shader)
+		p_wire_shader = new_shader
+	else:
+		push_error("Wireframe Shader compilation failed, not replacing old shader")
+		
+	if p_render_pipeline.is_valid():
+		rd.free_rid(p_render_pipeline)
+		
+	if p_wire_render_pipeline.is_valid():
+		rd.free_rid(p_wire_render_pipeline)
+		
 	p_shader = compile_shader(source_vertex, source_fragment)
 	p_wire_shader = compile_shader(source_vertex, source_wire_fragment)
 
@@ -224,6 +252,9 @@ func initialize_render(framebuffer_format : int):
 
 	p_index_array = rd.index_array_create(p_index_buffer, 0, index_buffer.size())
 	p_wire_index_array = rd.index_array_create(p_wire_index_buffer, 0, wire_index_buffer.size())
+	
+	#print("Buffer floats: ", index_buffer.size())
+	#print("Expected bytes: ", wire_index_buffer.size() * 4)
 	
 
 	initialize_render_pipelines(framebuffer_format)
@@ -330,8 +361,9 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(light_direction.x)
 	buffer.push_back(light_direction.y)
 	buffer.push_back(light_direction.z)
-	buffer.push_back(gradient_rotation)
+	buffer.push_back(1.0)
 	
+	buffer.push_back(gradient_rotation)
 	buffer.push_back(rotation)
 	buffer.push_back(height_scale)
 	buffer.push_back(angular_variance.x)
@@ -343,6 +375,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(offset.x)
 	buffer.push_back(offset.y)
 	buffer.push_back(offset.z)
+	buffer.push_back(1.0)
 	buffer.push_back(noise_seed)
 	buffer.push_back(initial_amplitude)
 	buffer.push_back(lacunarity)
@@ -385,10 +418,20 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
 	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
+	
+	print("UBO floats: ", buffer.size())
+	print("UBO bytes: ", buffer_bytes.size())
 	
 	var uniforms = []
 	var uniform := RDUniform.new()
@@ -459,6 +502,7 @@ const source_vertex = "
 			mat4 MVP;
 			mat4 MODEL_MATRIX;
 			vec3 _LightDirection;
+			float _pad0;
 			float _GradientRotation;
 			float _NoiseRotation;
 			float _TerrainHeight;
@@ -468,6 +512,7 @@ const source_vertex = "
 			float _AmplitudeDecay;
 			float _NormalStrength;
 			vec3 _Offset;
+			float _pad1;
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
@@ -479,10 +524,12 @@ const source_vertex = "
 			float _SlopeDamping;
 			vec4 _AmbientLight;
 			vec3 camera_position;
-			float _pad0;
+			float _pad2;
 			vec4 fog_color;
 			float fog_start;
 			float fog_end;
+			vec2 _pad3;
+			vec4 _pad4;
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -658,6 +705,7 @@ const source_fragment = "
 			mat4 MVP;
 			mat4 MODEL_MATRIX;
 			vec3 _LightDirection;
+			float _pad0;
 			float _GradientRotation;
 			float _NoiseRotation;
 			float _TerrainHeight;
@@ -667,6 +715,7 @@ const source_fragment = "
 			float _AmplitudeDecay;
 			float _NormalStrength;
 			vec3 _Offset;
+			float _pad1;
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
@@ -678,10 +727,12 @@ const source_fragment = "
 			float _SlopeDamping;
 			vec4 _AmbientLight;
 			vec3 camera_position;
-			float _pad0;
+			float _pad2;
 			vec4 fog_color;
 			float fog_start;
 			float fog_end;
+			vec2 _pad3;
+			vec4 _pad4;
 		};
 		
 		// These are the variables that we expect to receive from the vertex shader
