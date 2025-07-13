@@ -337,6 +337,22 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(ambient_light.b)
 	buffer.push_back(1.0)
 	
+	## Camera position (vec3)
+	#buffer.push_back(camera_position.x)
+	#buffer.push_back(camera_position.y)
+	#buffer.push_back(camera_position.z)
+	#buffer.push_back(1.0)
+
+	# Fog color (vec4, RGBA)
+	#buffer.push_back(fog_color.r)
+	#buffer.push_back(fog_color.g)
+	#buffer.push_back(fog_color.b)
+	#buffer.push_back(fog_color.a)
+
+	# Fog start and end (floats)
+	#buffer.push_back(fog_start)
+	#buffer.push_back(fog_end)
+	
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
@@ -402,7 +418,7 @@ func _notification(what):
 			rd.free_rid(p_wire_index_buffer)
 
 
-
+# This is the vertex shader as a string for some reason
 const source_vertex = "
 		#version 450
 
@@ -429,6 +445,7 @@ const source_vertex = "
 			float _FrequencyVarianceUpperBound;
 			float _SlopeDamping;
 			vec4 _AmbientLight;
+	
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -593,7 +610,7 @@ const source_vertex = "
 		}
 		"
 
-
+# This is the fragment shader, also in string format
 const source_fragment = "
 		#version 450
 
