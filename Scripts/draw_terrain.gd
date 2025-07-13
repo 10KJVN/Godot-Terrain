@@ -337,6 +337,8 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	var fog_end = 80.0     # fully fogged out at 80 units
 
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
+
+	# MODEL_MATRIX (mat4)
 	buffer.push_back(model_matrix.basis.x.x)
 	buffer.push_back(model_matrix.basis.y.x)
 	buffer.push_back(model_matrix.basis.z.x)
@@ -352,79 +354,76 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(model_matrix.basis.z.z)
 	buffer.push_back(model_matrix.origin.z)
 
-	# Row 4 (for homogeneous transform, the last row is usually [0,0,0,1])
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	buffer.push_back(1.0)
-	
-	buffer.push_back(light_direction.x)
-	buffer.push_back(light_direction.y)
-	buffer.push_back(light_direction.z)
-	buffer.push_back(1.0)
-	
-	buffer.push_back(gradient_rotation)
-	buffer.push_back(rotation)
-	buffer.push_back(height_scale)
-	buffer.push_back(angular_variance.x)
-	buffer.push_back(angular_variance.y)
-	buffer.push_back(zoom)
-	buffer.push_back(octave_count)
-	buffer.push_back(amplitude_decay)
-	buffer.push_back(1.0) # Does this represent _NormalStrenght?
-	buffer.push_back(offset.x)
-	buffer.push_back(offset.y)
-	buffer.push_back(offset.z)
-	buffer.push_back(1.0)
-	buffer.push_back(noise_seed)
-	buffer.push_back(initial_amplitude)
-	buffer.push_back(lacunarity)
-	buffer.push_back(slope_threshold.x)
-	buffer.push_back(slope_threshold.y)
+
+	# _LowSlopeColor (vec4)
 	buffer.push_back(low_slope_color.r)
 	buffer.push_back(low_slope_color.g)
 	buffer.push_back(low_slope_color.b)
-	buffer.push_back(1.0)
+	buffer.push_back(low_slope_color.a)
+
+	# _HighSlopeColor (vec4)
 	buffer.push_back(high_slope_color.r)
 	buffer.push_back(high_slope_color.g)
 	buffer.push_back(high_slope_color.b)
-	buffer.push_back(1.0)
-	buffer.push_back(frequency_variance.x)
-	buffer.push_back(frequency_variance.y)
-	buffer.push_back(slope_damping)
-	buffer.push_back(1.0)
+	buffer.push_back(high_slope_color.a)
+
+	# _AmbientLight (vec4)
 	buffer.push_back(ambient_light.r)
 	buffer.push_back(ambient_light.g)
 	buffer.push_back(ambient_light.b)
-	buffer.push_back(1.0)
-	
-	## Camera position (vec3)
-	buffer.push_back(camera_position.x)
-	buffer.push_back(camera_position.y)
-	buffer.push_back(camera_position.z)
-	buffer.push_back(1.0)
+	buffer.push_back(ambient_light.a)
 
-	# Fog color (vec4, RGBA)
+	# fog_color (vec4)
 	buffer.push_back(fog_color.r)
 	buffer.push_back(fog_color.g)
 	buffer.push_back(fog_color.b)
 	buffer.push_back(fog_color.a)
 
-	# Fog start and end (floats)
-	buffer.push_back(fog_start)
-	buffer.push_back(fog_end)
+	# _LightDirection (vec3) + _GradientRotation (float)
+	buffer.push_back(light_direction.x)
+	buffer.push_back(light_direction.y)
+	buffer.push_back(light_direction.z)
+	buffer.push_back(gradient_rotation) # Double-check variable name in GD, since its _GradientRotation in Vertex/Fragment shader
+
+	# _Offset (vec3) + _NoiseRotation (float)
+	buffer.push_back(offset.x)
+	buffer.push_back(offset.y)
+	buffer.push_back(offset.z)
+	buffer.push_back(rotation) # Im 100% sure this is the same as _NoiseRotation, its just called rotation in GD.
+
+	# camera_position (vec3) + _TerrainHeight (float)
+	buffer.push_back(camera_position.x)
+	buffer.push_back(camera_position.y) # Camera_position added by me, to prepare for Distance Fog Feature.
+	buffer.push_back(camera_position.z)
+	buffer.push_back(height_scale) # Also double-checked, this variable is the same as _TerrainHeight
+
+	# _AngularVariance (vec2) + _SlopeRange (vec2)
+	buffer.push_back(angular_variance.x)
+	buffer.push_back(angular_variance.y)
+	buffer.push_back(slope_threshold.x)
+	buffer.push_back(slope_threshold.y) # Verified to be _SlopeRange, variable just named like this in GD.
+
+	# Floats (4 + 4 + 4 + ...)
+	buffer.push_back(zoom) # Exported variable, described as 'Horizontal scale of the noise' -> Line: 26, so yes its the Uniform _Scale
+	buffer.push_back(octave_count) # float _Octaves
+	buffer.push_back(amplitude_decay) # float _AmplitudeDecay
+	buffer.push_back(1.0) # _NormalStrength
+
+	buffer.push_back(noise_seed) # _Seed
+	buffer.push_back(initial_amplitude) # _InitialAmplitude
+	buffer.push_back(lacunarity) # _Lacunarity
+	buffer.push_back(slope_damping) # _SlopeDamping
+
+	buffer.push_back(frequency_variance.x) # _FrequencyVarianceLowerBound
+	buffer.push_back(frequency_variance.y) # _FrequencyVarianceUpperBound
 	
-	# Padding to align UBO size to 16 bytes
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	
+	buffer.push_back(fog_start) # fog_start
+	buffer.push_back(fog_end) # fog_end
+
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
@@ -500,36 +499,39 @@ const source_vertex = "
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the fragment shader.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
-			mat4 MODEL_MATRIX;
+			mat4 MODEL_MATRIX; // 16
+			
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color; // 4
+			
 			vec3 _LightDirection;
-			float _pad0;
 			float _GradientRotation;
-			float _NoiseRotation;
-			float _TerrainHeight;
+			
+			vec3 _Offset;
+			float _NoiseRotation; 
+			
+			vec3 camera_position;
+			float _TerrainHeight; // 3 + 1
+			
 			vec2 _AngularVariance;
+			vec2 _SlopeRange; // 2 + 2
+			
 			float _Scale;
 			float _Octaves;
 			float _AmplitudeDecay;
 			float _NormalStrength;
-			vec3 _Offset;
-			float _pad1;
+			
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
+			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
-			vec3 camera_position;
-			float _pad2;
-			vec4 fog_color;
 			float fog_start;
-			float fog_end;
-			vec2 _pad3;
-			vec4 _pad4;
+			float fog_end;  // 1 + 1 + 1 + 1
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -703,36 +705,39 @@ const source_fragment = "
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the vertex shader, they're technically the same thing occupying the same spot in memory this is just duplicate code required for compilation.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
-			mat4 MODEL_MATRIX;
+			mat4 MODEL_MATRIX; // 16
+			
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color; // 4
+			
 			vec3 _LightDirection;
-			float _pad0;
 			float _GradientRotation;
-			float _NoiseRotation;
-			float _TerrainHeight;
+			
+			vec3 _Offset;
+			float _NoiseRotation; 
+			
+			vec3 camera_position;
+			float _TerrainHeight; // 3 + 1
+			
 			vec2 _AngularVariance;
+			vec2 _SlopeRange; // 2 + 2
+			
 			float _Scale;
 			float _Octaves;
 			float _AmplitudeDecay;
 			float _NormalStrength;
-			vec3 _Offset;
-			float _pad1;
+			
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
+			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
-			vec3 camera_position;
-			float _pad2;
-			vec4 fog_color;
 			float fog_start;
-			float fog_end;
-			vec2 _pad3;
-			vec4 _pad4;
+			float fog_end; // 1 + 1 + 1 + 1
 		};
 		
 		// These are the variables that we expect to receive from the vertex shader
