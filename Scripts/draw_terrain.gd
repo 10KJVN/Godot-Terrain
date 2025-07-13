@@ -5,6 +5,8 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## Regenerate mesh data and recompile shaders TODO: Separate mesh generation and shader recompilation
 @export var regenerate : bool = true
 
+@export var camera_position : Vector3 = Vector3.ZERO
+
 @export_group("Mesh Settings")
 ## Number of vertices in the plane mesh, quad count per row is thus  [code]side_length - 1[/code]
 @export_range(2, 1000, 1, "or_greater") var side_length : int = 200
@@ -275,11 +277,11 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	var buffer = Array()
 
 	# Assemble the model, view, and projection matrices for vertex world space -> clip space conversion (watch PS1 video if you care about how this works but otherwise it just works(tm))
-	var model = transform
+	var model_matrix = transform
 	var view = render_scene_data.get_cam_transform().inverse()
 	var projection = render_scene_data.get_view_projection(0)
 
-	var model_view = Projection(view * model)
+	var model_view = Projection(view * model_matrix)
 	var MVP = projection * model_view;
 	
 	# Store MVP matrix in gpu data buffer
@@ -299,16 +301,57 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	else:
 		light_direction = light.transform.basis.z.normalized()
 		
-	#var camera_position = get_viewport().get_camera_3d().global.transform.origin
 	var fog_color = Color(1.0, 0.5, 0.9, 1.0)
 	var fog_start = 20.0   # starts fading at 20 units
 	var fog_end = 80.0     # fully fogged out at 80 units
 
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
+	buffer.push_back(MVP[0][0])
+	buffer.push_back(MVP[0][1])
+	buffer.push_back(MVP[0][2])
+	buffer.push_back(MVP[0][3])
+	
+	buffer.push_back(MVP[1][0])
+	buffer.push_back(MVP[1][1])
+	buffer.push_back(MVP[1][2])
+	buffer.push_back(MVP[1][3])
+	
+	buffer.push_back(MVP[2][0])
+	buffer.push_back(MVP[2][1])
+	buffer.push_back(MVP[2][2])
+	buffer.push_back(MVP[2][3])
+	
+	buffer.push_back(MVP[3][0])
+	buffer.push_back(MVP[3][1])
+	buffer.push_back(MVP[3][2])
+	buffer.push_back(MVP[3][3])
+		
+	buffer.push_back(model_matrix.basis.x.x)
+	buffer.push_back(model_matrix.basis.y.x)
+	buffer.push_back(model_matrix.basis.z.x)
+	buffer.push_back(model_matrix.origin.x)
+
+	buffer.push_back(model_matrix.basis.x.y)
+	buffer.push_back(model_matrix.basis.y.y)
+	buffer.push_back(model_matrix.basis.z.y)
+	buffer.push_back(model_matrix.origin.y)
+
+	buffer.push_back(model_matrix.basis.x.z)
+	buffer.push_back(model_matrix.basis.y.z)
+	buffer.push_back(model_matrix.basis.z.z)
+	buffer.push_back(model_matrix.origin.z)
+
+	# Row 4 (for homogeneous transform, the last row is usually [0,0,0,1])
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
+	
 	buffer.push_back(light_direction.x)
 	buffer.push_back(light_direction.y)
 	buffer.push_back(light_direction.z)
 	buffer.push_back(gradient_rotation)
+	
 	buffer.push_back(rotation)
 	buffer.push_back(height_scale)
 	buffer.push_back(angular_variance.x)
@@ -316,7 +359,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(zoom)
 	buffer.push_back(octave_count)
 	buffer.push_back(amplitude_decay)
-	buffer.push_back(1.0)
+	buffer.push_back(1.0) # Does this represent _NormalStrenght?
 	buffer.push_back(offset.x)
 	buffer.push_back(offset.y)
 	buffer.push_back(offset.z)
@@ -343,10 +386,10 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(1.0)
 	
 	## Camera position (vec3)
-	#buffer.push_back(camera_position.x)
-	#buffer.push_back(camera_position.y)
-	#buffer.push_back(camera_position.z)
-	#buffer.push_back(1.0)
+	buffer.push_back(camera_position.x)
+	buffer.push_back(camera_position.y)
+	buffer.push_back(camera_position.z)
+	buffer.push_back(1.0)
 
 	# Fog color (vec4, RGBA)
 	buffer.push_back(fog_color.r)
@@ -430,6 +473,7 @@ const source_vertex = "
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the fragment shader.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
+			mat4 MODEL_MATRIX;
 			vec3 _LightDirection;
 			float _GradientRotation;
 			float _NoiseRotation;
@@ -450,7 +494,11 @@ const source_vertex = "
 			float _FrequencyVarianceUpperBound;
 			float _SlopeDamping;
 			vec4 _AmbientLight;
-	
+			vec3 camera_position;
+			float _pad0;
+			vec4 fog_color;
+			float fog_start;
+			float fog_end;
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -460,6 +508,7 @@ const source_vertex = "
 		// This is what the vertex shader will output and send to the fragment shader.
 		layout(location = 2) out vec4 v_Color;
 		layout(location = 3) out vec3 pos;
+		layout(location = 4) out vec3 frag_world_pos;
 
 		#define PI 3.141592653589793238462
 		
@@ -597,6 +646,7 @@ const source_vertex = "
 		void main() {
 			// Passes the vertex color over to the fragment shader, even though we don't use it but you can use it if you want I guess
 			v_Color = a_Color;
+			frag_world_pos = (MODEL_MATRIX * vec4(a_Position, 1.0)).xyz;
 
 			// The fragment shader also calculates the fractional brownian motion for pixel perfect normal vectors and lighting, so we pass the vertex position to the fragment shader
 			pos = a_Position;
@@ -622,6 +672,7 @@ const source_fragment = "
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the vertex shader, they're technically the same thing occupying the same spot in memory this is just duplicate code required for compilation.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
+			mat4 MODEL_MATRIX;
 			vec3 _LightDirection;
 			float _GradientRotation;
 			float _NoiseRotation;
@@ -642,11 +693,17 @@ const source_fragment = "
 			float _FrequencyVarianceUpperBound;
 			float _SlopeDamping;
 			vec4 _AmbientLight;
+			vec3 camera_position;
+			float _pad0;
+			vec4 fog_color;
+			float fog_start;
+			float fog_end;
 		};
 		
 		// These are the variables that we expect to receive from the vertex shader
 		layout(location = 2) in vec4 a_Color;
 		layout(location = 3) in vec3 pos;
+		layout(location = 4) in vec3 frag_world_pos;
 		
 		// This is what the fragment shader will output, usually just a pixel color
 		layout(location = 0) out vec4 frag_color;
@@ -815,6 +872,11 @@ const source_fragment = "
 
 			// Convert from linear rgb to srgb for proper color output, ideally you'd do this as some final post processing effect because otherwise you will need to revert this gamma correction elsewhere
 			frag_color = pow(lit, vec4(2.2));
+			
+			// Fog
+			float dist = length(frag_world_pos - camera_position);
+			float fog_factor = clamp((dist - fog_start) / (fog_end - fog_start), 0.0, 1.0);
+			frag_color = mix(frag_color, fog_color, fog_factor);
 		}
 		"
 
