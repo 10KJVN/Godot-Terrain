@@ -9,6 +9,7 @@ var position_lerp_time = 0.2;
 
 var rotation_lerp_time = 0.01;
 
+@export var world_environment : WorldEnvironment
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -54,6 +55,14 @@ func _process(delta: float) -> void:
 	interpolating_camera_state.LerpTowards(target_camera_state, positionLerpPct, 0);
 
 	self.position = interpolating_camera_state.GetCameraPosition()
+	
+	# Grab the WorldEnvironment and push the camera position into the effect
+	if world_environment != null:
+		if world_environment.compositor_effects.size() > 0:
+			var terrain_effect = world_environment.compositor_effects[0]
+			if terrain_effect is DrawTerrainMesh:
+				terrain_effect.camera_position = interpolating_camera_state.GetCameraPosition()
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

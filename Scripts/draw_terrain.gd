@@ -306,26 +306,6 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	var fog_end = 80.0     # fully fogged out at 80 units
 
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
-	buffer.push_back(MVP[0][0])
-	buffer.push_back(MVP[0][1])
-	buffer.push_back(MVP[0][2])
-	buffer.push_back(MVP[0][3])
-	
-	buffer.push_back(MVP[1][0])
-	buffer.push_back(MVP[1][1])
-	buffer.push_back(MVP[1][2])
-	buffer.push_back(MVP[1][3])
-	
-	buffer.push_back(MVP[2][0])
-	buffer.push_back(MVP[2][1])
-	buffer.push_back(MVP[2][2])
-	buffer.push_back(MVP[2][3])
-	
-	buffer.push_back(MVP[3][0])
-	buffer.push_back(MVP[3][1])
-	buffer.push_back(MVP[3][2])
-	buffer.push_back(MVP[3][3])
-		
 	buffer.push_back(model_matrix.basis.x.x)
 	buffer.push_back(model_matrix.basis.y.x)
 	buffer.push_back(model_matrix.basis.z.x)
@@ -400,6 +380,10 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	# Fog start and end (floats)
 	buffer.push_back(fog_start)
 	buffer.push_back(fog_end)
+	
+	# Padding to align UBO size to 16 bytes
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
 	
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
