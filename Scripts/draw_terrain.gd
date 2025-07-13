@@ -131,31 +131,38 @@ func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
 	return shader
 
 func initialize_render(framebuffer_format : int):
-	
+	# Compile main shader
 	var new_shader = compile_shader(source_vertex, source_fragment)
-	
+	var new_wire_shader = compile_shader(source_vertex, source_wire_fragment)
+
+	# Replace old if valid 
 	if new_shader.is_valid():
 		if p_shader.is_valid():
 			rd.free_rid(p_shader)
+			p_shader = RID()
 		p_shader = new_shader
 	else:
 		push_error("Shader compilation failed, not replacing old shader")
-	
-	if new_shader.is_valid():
+
+	if new_wire_shader.is_valid():
 		if p_wire_shader.is_valid():
 			rd.free_rid(p_wire_shader)
-		p_wire_shader = new_shader
+			p_wire_shader = RID()
+		p_wire_shader = new_wire_shader
 	else:
 		push_error("Wireframe Shader compilation failed, not replacing old shader")
-		
+
+	# Free pipelines if they exist
 	if p_render_pipeline.is_valid():
 		rd.free_rid(p_render_pipeline)
-		
+		p_render_pipeline = RID()
+
 	if p_wire_render_pipeline.is_valid():
 		rd.free_rid(p_wire_render_pipeline)
-		
-	p_shader = compile_shader(source_vertex, source_fragment)
-	p_wire_shader = compile_shader(source_vertex, source_wire_fragment)
+		p_wire_render_pipeline = RID()
+	
+	#p_shader = compile_shader(source_vertex, source_fragment)
+	#p_wire_shader = compile_shader(source_vertex, source_wire_fragment)
 
 	var vertex_buffer := PackedFloat32Array([])
 	var half_length = (side_length - 1) / 2.0
@@ -174,31 +181,8 @@ func initialize_render(framebuffer_format : int):
 			for i in 3: vertex_buffer.push_back(pos[i])
 			for i in 4: vertex_buffer.push_back(color[i])
 
-
 	var vertex_count = vertex_buffer.size() / 7
 	print("Vertex Count: " + str(vertex_count))
-
-	# Dump vertex data, I would delete this but it's probably helpful definitely do not uncomment this if your mesh has more than a couple vertices
-	# for i in vertex_count:
-	#     var j = i * 7
-	#     var pos = Vector3()
-
-	#     pos.x = vertex_buffer[j]
-	#     pos.y = vertex_buffer[j + 1]
-	#     pos.z = vertex_buffer[j + 2]
-
-	#     var color = Vector4()
-
-	#     color.x = vertex_buffer[j + 3]
-	#     color.y = vertex_buffer[j + 4]
-	#     color.z = vertex_buffer[j + 5]
-	#     color.w = vertex_buffer[j + 6]
-
-	#     print("Vertex " + str(i) + " ---")
-	#     print("Position: " + str(pos))
-	#     print("Color: " + str(color))
-
-
 
 	var index_buffer := PackedInt32Array([])
 	var wire_index_buffer := PackedInt32Array([])
@@ -253,10 +237,6 @@ func initialize_render(framebuffer_format : int):
 	p_index_array = rd.index_array_create(p_index_buffer, 0, index_buffer.size())
 	p_wire_index_array = rd.index_array_create(p_wire_index_buffer, 0, wire_index_buffer.size())
 	
-	#print("Buffer floats: ", index_buffer.size())
-	#print("Expected bytes: ", wire_index_buffer.size() * 4)
-	
-
 	initialize_render_pipelines(framebuffer_format)
 
 # Initialization of the render pipeline objects is separated from the above code so that we don't have to regenerate everything when the framebuffer format changes
@@ -424,13 +404,15 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(fog_start) # fog_start
 	buffer.push_back(fog_end) # fog_end
 
+	#print("Final Buffer Floats:", buffer.size()) UNCOMMENT THESE WHEN NEEDED
+	#print("Expected Floats:", 76)
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
 	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
 	
-	print("UBO floats: ", buffer.size())
-	print("UBO bytes: ", buffer_bytes.size())
+	#print("UBO floats: ", buffer.size())
+	#print("UBO bytes: ", buffer_bytes.size()) UNCOMMENT THESE WHEN NEEDED, CALLED EVERY FRAME SO ITS LAGGY. 
 	
 	var uniforms = []
 	var uniform := RDUniform.new()
@@ -925,27 +907,32 @@ const source_wire_fragment = "
 		#version 450
 
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
-			mat4 MVP; // 64 -> 0
-			vec3 _LightDirection; // 16 -> 64
+			mat4 MVP;
+			mat4 MODEL_MATRIX;
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color;
+			vec3 _LightDirection;
 			float _GradientRotation;
-			float _NoiseRotation; // 4 -> 80
-			float _Amplitude; // 4 -> 84
-			vec2 _AngularVariance; // 8 -> 88
-			float _Frequency; // 4 -> 96
-			float _Octaves; // 4 -> 100
-			float _AmplitudeDecay; // 4 -> 104
-			float _NormalStrength; // 4  -> 108
-			vec3 _Offset; // 16 -> 112 -> 128
+			vec3 _Offset;
+			float _NoiseRotation; 
+			vec3 camera_position;
+			float _TerrainHeight;
+			vec2 _AngularVariance;
+			vec2 _SlopeRange;
+			float _Scale;
+			float _Octaves;
+			float _AmplitudeDecay;
+			float _NormalStrength;
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
+			float fog_start;
+			float fog_end;
 		};
 		
 		layout(location = 2) in vec4 a_Color;

@@ -8,13 +8,14 @@
 [sub_resource type="CompositorEffect" id="CompositorEffect_fdx5o"]
 resource_local_to_scene = false
 resource_name = ""
-enabled = true
+enabled = false
 effect_callback_type = 4
 needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("1_1kw2x")
 regenerate = false
-side_length = 400
+camera_position = Vector3(0, 0, 0)
+side_length = 152
 mesh_scale = 0.5
 wireframe = false
 noise_seed = 1
@@ -44,6 +45,7 @@ compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_fdx5
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.624, 67.572, -3.802)
 script = ExtResource("1_fdx5o")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
