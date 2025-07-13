@@ -298,6 +298,11 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 			push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
 	else:
 		light_direction = light.transform.basis.z.normalized()
+		
+	#var camera_position = get_viewport().get_camera_3d().global.transform.origin
+	var fog_color = Color(1.0, 0.5, 0.9, 1.0)
+	var fog_start = 20.0   # starts fading at 20 units
+	var fog_end = 80.0     # fully fogged out at 80 units
 
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
 	buffer.push_back(light_direction.x)
@@ -344,14 +349,14 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	#buffer.push_back(1.0)
 
 	# Fog color (vec4, RGBA)
-	#buffer.push_back(fog_color.r)
-	#buffer.push_back(fog_color.g)
-	#buffer.push_back(fog_color.b)
-	#buffer.push_back(fog_color.a)
+	buffer.push_back(fog_color.r)
+	buffer.push_back(fog_color.g)
+	buffer.push_back(fog_color.b)
+	buffer.push_back(fog_color.a)
 
 	# Fog start and end (floats)
-	#buffer.push_back(fog_start)
-	#buffer.push_back(fog_end)
+	buffer.push_back(fog_start)
+	buffer.push_back(fog_end)
 	
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
