@@ -70,6 +70,18 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## Color of steeper areas of terrain
 @export var high_slope_color : Color = Color(0.16, 0.1, 0.1)
 
+@export_group("Fog Settings")
+
+## The color the terrain fades to in the distance
+@export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
+
+## Distance at which fog starts
+@export_range(0.0, 1000.0, 1.0, "or_greater")
+var fog_start : float = 20.0
+
+## Distance at which fog reaches full strength
+@export_range(0.0, 5000.0, 1.0, "or_greater")
+var fog_end : float = 80.0
 
 @export_group("Light Settings")
 
@@ -312,9 +324,9 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	else:
 		light_direction = light.transform.basis.z.normalized()
 		
-	var fog_color = Color(1.0, 0.5, 0.9, 1.0)
-	var fog_start = 20.0   # starts fading at 20 units
-	var fog_end = 80.0     # fully fogged out at 80 units
+	#var fog_color = Color(1.0, 0.5, 0.9, 1.0)
+	#var fog_start = 20.0   # starts fading at 20 units
+	#var fog_end = 80.0     # fully fogged out at 80 units
 
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
 
