@@ -375,6 +375,9 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(offset.z)
 	buffer.push_back(rotation) # Im 100% sure this is the same as _NoiseRotation, its just called rotation in GD.
 
+	# Grab latest camera world position directly
+	camera_position = render_scene_data.get_cam_transform().origin
+
 	# camera_position (vec3) + _TerrainHeight (float)
 	buffer.push_back(camera_position.x)
 	buffer.push_back(camera_position.y) # Camera_position added by me, to prepare for Distance Fog Feature.
