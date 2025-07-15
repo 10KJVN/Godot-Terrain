@@ -74,18 +74,18 @@ class_name DrawTerrainMesh extends CompositorEffect
 
 ## The color the terrain fades to in the distance
 @export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
+@export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02 # New variable
 
-@export_range(0.1, 5.0, 0.1) var fog_density : float = 1.0 # New variable
-
+## Still can't see what this does, but it's there ig.
 @export_range(0.0, 1.0, 0.01) var fog_height_fade : float = 0.5 # New Variable II
 
 ## Distance at which fog starts
 @export_range(0.0, 1000.0, 1.0, "or_greater")
-var fog_start : float = 20.0
+var fog_start : float = 100.0
 
 ## Distance at which fog reaches full strength
-@export_range(0.0, 5000.0, 1.0, "or_greater")
-var fog_end : float = 80.0
+##@export_range(0.0, 5000.0, 1.0, "or_greater")
+##var fog_end : float = 80.0
 
 @export_group("Light Settings")
 
@@ -419,23 +419,25 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 
 	buffer.push_back(frequency_variance.x) # _FrequencyVarianceLowerBound
 	buffer.push_back(frequency_variance.y) # _FrequencyVarianceUpperBound
-	buffer.push_back(0.0)
-	buffer.push_back(0.0)
-	
-	buffer.push_back(fog_start) # fog_start
-	buffer.push_back(fog_end) # fog_end
+	buffer.push_back(fog_start)
 	buffer.push_back(fog_density)
+	
+	#print("Fog vars: ", fog_start, fog_density, fog_height_fade)
+	
 	buffer.push_back(fog_height_fade)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
 
-	#print("Final Buffer Floats:", buffer.size()) UNCOMMENT THESE WHEN NEEDED
-	#print("Expected Floats:", 78)
+	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT THESE WHEN NEEDED
+	#print("Expected Floats:", 80)
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
 	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
 	
 	#print("UBO floats: ", buffer.size())
-	#print("UBO bytes: ", buffer_bytes.size()) UNCOMMENT THESE WHEN NEEDED, CALLED EVERY FRAME SO ITS LAGGY. 
+	#print("UBO bytes: ", buffer_bytes.size()) #UNCOMMENT THESE WHEN NEEDED, CALLED EVERY FRAME SO ITS LAGGY. 
 	
 	var uniforms = []
 	var uniform := RDUniform.new()
@@ -537,7 +539,6 @@ const source_vertex = "
 			float _FrequencyVarianceUpperBound;
 			
 			float fog_start;
-			float fog_end;
 			float fog_density;
 			float fog_height_fade;
 		};
@@ -746,7 +747,6 @@ const source_fragment = "
 			float _FrequencyVarianceUpperBound;
 			
 			float fog_start;
-			float fog_end;
 			float fog_density;
 			float fog_height_fade;
 		};
@@ -924,14 +924,23 @@ const source_fragment = "
 			// Convert from linear rgb to srgb for proper color output, ideally you'd do this as some final post processing effect because otherwise you will need to revert this gamma correction elsewhere
 			frag_color = pow(lit, vec4(2.2));
 			
-			// Fog
+			lit = pow(lit, vec4(2.2)); // Gamma correct
+
+			// === Distance Fog ===
 			float dist = length(frag_world_pos - camera_position);
-			float fog_distance = max(0.0, dist - fog_start);
-			float fog_range = max(0.0001, fog_end - fog_start); // Prevent div/0
-			float fog_factor = clamp(1.0 - exp(-pow(fog_distance / fog_range, 2.0)), 0.0, 1.0);
+
+			// Optional offset where fog starts:
+			dist = max(0.0, dist - fog_start);
+
+			// Compute height-based density scaling:
 			float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
-			fog_factor *= height_factor;
-			frag_color = mix(frag_color, fog_color, fog_factor);
+			float density = fog_density * height_factor;
+
+			// Compute Beer's Law transmittance:
+			float transmittance = exp(-dist * density);
+
+			// Final blend:
+			frag_color = mix(fog_color, lit, transmittance);
 		}
 		"
 
@@ -965,7 +974,6 @@ const source_wire_fragment = "
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
 			float fog_start;
-			float fog_end;
 			float fog_density;
 			float fog_height_fade;
 		};
