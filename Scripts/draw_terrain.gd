@@ -75,6 +75,10 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## The color the terrain fades to in the distance
 @export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
 
+@export_range(0.1, 5.0, 0.1) var fog_density : float = 1.0 # New variable
+
+@export_range(0.0, 1.0, 0.01) var fog_height_fade : float = 0.5 # New Variable II
+
 ## Distance at which fog starts
 @export_range(0.0, 1000.0, 1.0, "or_greater")
 var fog_start : float = 20.0
@@ -415,12 +419,16 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 
 	buffer.push_back(frequency_variance.x) # _FrequencyVarianceLowerBound
 	buffer.push_back(frequency_variance.y) # _FrequencyVarianceUpperBound
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
 	
 	buffer.push_back(fog_start) # fog_start
 	buffer.push_back(fog_end) # fog_end
+	buffer.push_back(fog_density)
+	buffer.push_back(fog_height_fade)
 
 	#print("Final Buffer Floats:", buffer.size()) UNCOMMENT THESE WHEN NEEDED
-	#print("Expected Floats:", 76)
+	#print("Expected Floats:", 78)
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
@@ -527,8 +535,11 @@ const source_vertex = "
 			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
+			
 			float fog_start;
-			float fog_end;  // 1 + 1 + 1 + 1
+			float fog_end;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -733,8 +744,11 @@ const source_fragment = "
 			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
+			
 			float fog_start;
-			float fog_end; // 1 + 1 + 1 + 1
+			float fog_end;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		// These are the variables that we expect to receive from the vertex shader
@@ -912,7 +926,11 @@ const source_fragment = "
 			
 			// Fog
 			float dist = length(frag_world_pos - camera_position);
-			float fog_factor = clamp((dist - fog_start) / (fog_end - fog_start), 0.0, 1.0);
+			float fog_distance = max(0.0, dist - fog_start);
+			float fog_range = max(0.0001, fog_end - fog_start); // Prevent div/0
+			float fog_factor = clamp(1.0 - exp(-pow(fog_distance / fog_range, 2.0)), 0.0, 1.0);
+			float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
+			fog_factor *= height_factor;
 			frag_color = mix(frag_color, fog_color, fog_factor);
 		}
 		"
@@ -948,6 +966,8 @@ const source_wire_fragment = "
 			float _FrequencyVarianceUpperBound;
 			float fog_start;
 			float fog_end;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		layout(location = 2) in vec4 a_Color;
