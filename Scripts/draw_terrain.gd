@@ -328,10 +328,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	else:
 		light_direction = light.transform.basis.z.normalized()
 		
-	#var fog_color = Color(1.0, 0.5, 0.9, 1.0)
-	#var fog_start = 20.0   # starts fading at 20 units
-	#var fog_end = 80.0     # fully fogged out at 80 units
-
+	
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
 
 	# MODEL_MATRIX (mat4)
@@ -926,10 +923,8 @@ const source_fragment = "
 			
 			lit = pow(lit, vec4(2.2)); // Gamma correct
 
-			// === Distance Fog ===
+			// Fog
 			float dist = length(frag_world_pos - camera_position);
-
-			// Optional offset where fog starts:
 			dist = max(0.0, dist - fog_start);
 
 			// Compute height-based density scaling:
