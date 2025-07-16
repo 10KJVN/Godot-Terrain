@@ -72,20 +72,19 @@ class_name DrawTerrainMesh extends CompositorEffect
 
 @export_group("Fog Settings")
 
-## The color the terrain fades to in the distance
+## Fades terrain color into a customizable fog_color as distance increases.
 @export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
-@export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02 # New variable
 
-## Still can't see what this does, but it's there ig.
-@export_range(0.0, 1.0, 0.01) var fog_height_fade : float = 0.5 # New Variable II
+## Controls how thick the fog is (higher = denser fog at shorter distances).
+@export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02
 
-## Distance at which fog starts
+## Reduces fog density at higher altitudes for “valley mist” effect.
+@export_range(0.0, 1.0, 0.01) var fog_height_fade : float = 0.5
+
+## Optional near offset for local fog layers.
 @export_range(0.0, 1000.0, 1.0, "or_greater")
 var fog_start : float = 100.0
 
-## Distance at which fog reaches full strength
-##@export_range(0.0, 5000.0, 1.0, "or_greater")
-##var fog_end : float = 80.0
 
 @export_group("Light Settings")
 
@@ -147,11 +146,9 @@ func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
 	return shader
 
 func initialize_render(framebuffer_format : int):
-	# Compile main shader
 	var new_shader = compile_shader(source_vertex, source_fragment)
 	var new_wire_shader = compile_shader(source_vertex, source_wire_fragment)
-
-	# Replace old if valid 
+ 
 	if new_shader.is_valid():
 		if p_shader.is_valid():
 			rd.free_rid(p_shader)
@@ -168,7 +165,6 @@ func initialize_render(framebuffer_format : int):
 	else:
 		push_error("Wireframe Shader compilation failed, not replacing old shader")
 
-	# Free pipelines if they exist
 	if p_render_pipeline.is_valid():
 		rd.free_rid(p_render_pipeline)
 		p_render_pipeline = RID()
@@ -380,33 +376,33 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(light_direction.x)
 	buffer.push_back(light_direction.y)
 	buffer.push_back(light_direction.z)
-	buffer.push_back(gradient_rotation) # Double-check variable name in GD, since its _GradientRotation in Vertex/Fragment shader
+	buffer.push_back(gradient_rotation)
 
 	# _Offset (vec3) + _NoiseRotation (float)
 	buffer.push_back(offset.x)
 	buffer.push_back(offset.y)
 	buffer.push_back(offset.z)
-	buffer.push_back(rotation) # Im 100% sure this is the same as _NoiseRotation, its just called rotation in GD.
+	buffer.push_back(rotation)
 
 	# Grab latest camera world position directly
 	camera_position = render_scene_data.get_cam_transform().origin
 
 	# camera_position (vec3) + _TerrainHeight (float)
 	buffer.push_back(camera_position.x)
-	buffer.push_back(camera_position.y) # Camera_position added by me, to prepare for Distance Fog Feature.
+	buffer.push_back(camera_position.y)
 	buffer.push_back(camera_position.z)
-	buffer.push_back(height_scale) # Also double-checked, this variable is the same as _TerrainHeight
+	buffer.push_back(height_scale)
 
 	# _AngularVariance (vec2) + _SlopeRange (vec2)
 	buffer.push_back(angular_variance.x)
 	buffer.push_back(angular_variance.y)
-	buffer.push_back(slope_threshold.x)
-	buffer.push_back(slope_threshold.y) # Verified to be _SlopeRange, variable just named like this in GD.
+	buffer.push_back(slope_threshold.x) 
+	buffer.push_back(slope_threshold.y)
 
 	# Floats (4 + 4 + 4 + ...)
-	buffer.push_back(zoom) # Exported variable, described as 'Horizontal scale of the noise' -> Line: 26, so yes its the Uniform _Scale
-	buffer.push_back(octave_count) # float _Octaves
-	buffer.push_back(amplitude_decay) # float _AmplitudeDecay
+	buffer.push_back(zoom) # _Scale
+	buffer.push_back(octave_count) # _Octaves
+	buffer.push_back(amplitude_decay) # _AmplitudeDecay
 	buffer.push_back(1.0) # _NormalStrength
 
 	buffer.push_back(noise_seed) # _Seed
@@ -419,22 +415,17 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(fog_start)
 	buffer.push_back(fog_density)
 	
-	#print("Fog vars: ", fog_start, fog_density, fog_height_fade)
-	
 	buffer.push_back(fog_height_fade)
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	buffer.push_back(1.0)
 
-	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT THESE WHEN NEEDED
+	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT if byte size error
 	#print("Expected Floats:", 80)
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
 	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
-	
-	#print("UBO floats: ", buffer.size())
-	#print("UBO bytes: ", buffer_bytes.size()) #UNCOMMENT THESE WHEN NEEDED, CALLED EVERY FRAME SO ITS LAGGY. 
 	
 	var uniforms = []
 	var uniform := RDUniform.new()
@@ -496,7 +487,6 @@ func _notification(what):
 			rd.free_rid(p_wire_index_buffer)
 
 
-# This is the vertex shader as a string for some reason
 const source_vertex = "
 		#version 450
 
@@ -704,7 +694,6 @@ const source_vertex = "
 		}
 		"
 
-# This is the fragment shader, also in string format
 const source_fragment = "
 		#version 450
 
@@ -927,14 +916,12 @@ const source_fragment = "
 			float dist = length(frag_world_pos - camera_position);
 			dist = max(0.0, dist - fog_start);
 
-			// Compute height-based density scaling:
 			float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
 			float density = fog_density * height_factor;
 
 			// Compute Beer's Law transmittance:
 			float transmittance = exp(-dist * density);
 
-			// Final blend:
 			frag_color = mix(fog_color, lit, transmittance);
 		}
 		"
