@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://c5acgxyhs4xcn"]
 
-[ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="1_1kw2x"]
-[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_fdx5o"]
+[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_p1mwd"]
+[ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="2_txr6u"]
 
 [sub_resource type="Environment" id="Environment_1kw2x"]
 
@@ -12,9 +12,9 @@ enabled = true
 effect_callback_type = 4
 needs_motion_vectors = false
 needs_normal_roughness = false
-script = ExtResource("1_1kw2x")
+script = ExtResource("2_txr6u")
 regenerate = false
-camera_position = Vector3(-100.928, 29.976, 32.2823)
+camera_position = Vector3(27.5716, 49.6018, 43.0356)
 side_length = 256
 mesh_scale = 0.5
 wireframe = false
@@ -50,7 +50,7 @@ compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_fdx5
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 55, 0)
-script = ExtResource("1_fdx5o")
+script = ExtResource("1_p1mwd")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_1kw2x")
