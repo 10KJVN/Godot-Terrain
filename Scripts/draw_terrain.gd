@@ -5,6 +5,8 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## Regenerate mesh data and recompile shaders TODO: Separate mesh generation and shader recompilation
 @export var regenerate : bool = true
 
+@export var camera_position : Vector3 = Vector3.ZERO
+
 @export_group("Mesh Settings")
 ## Number of vertices in the plane mesh, quad count per row is thus  [code]side_length - 1[/code]
 @export_range(2, 1000, 1, "or_greater") var side_length : int = 200
@@ -68,6 +70,21 @@ class_name DrawTerrainMesh extends CompositorEffect
 ## Color of steeper areas of terrain
 @export var high_slope_color : Color = Color(0.16, 0.1, 0.1)
 
+@export_group("Fog Settings")
+
+## Fades terrain color into a customizable fog_color as distance increases.
+@export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
+
+## Controls how thick the fog is (higher = denser fog at shorter distances).
+@export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02
+
+## Reduces fog density at higher altitudes for “valley mist” effect.
+@export_range(0.0, 1.0, 0.01) var fog_height_fade : float = 0.5
+
+## Optional near offset for local fog layers.
+@export_range(0.0, 1000.0, 1.0, "or_greater")
+var fog_start : float = 100.0
+
 
 @export_group("Light Settings")
 
@@ -115,17 +132,49 @@ func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
 	var shader_spirv : RDShaderSPIRV = rd.shader_compile_spirv_from_source(src)
 	
 	var err = shader_spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_VERTEX)
-	if err: push_error(err)
+	if err != "":
+		push_error(err)
+		return RID() # fail
+	
 	err = shader_spirv.get_stage_compile_error(RenderingDevice.SHADER_STAGE_FRAGMENT)
-	if err: push_error(err)
+	if err != "": 
+		push_error(err)
+		return RID() # fail
 	
 	var shader : RID = rd.shader_create_from_spirv(shader_spirv)
 	
 	return shader
 
 func initialize_render(framebuffer_format : int):
-	p_shader = compile_shader(source_vertex, source_fragment)
-	p_wire_shader = compile_shader(source_vertex, source_wire_fragment)
+	var new_shader = compile_shader(source_vertex, source_fragment)
+	var new_wire_shader = compile_shader(source_vertex, source_wire_fragment)
+ 
+	if new_shader.is_valid():
+		if p_shader.is_valid():
+			rd.free_rid(p_shader)
+			p_shader = RID()
+		p_shader = new_shader
+	else:
+		push_error("Shader compilation failed, not replacing old shader")
+
+	if new_wire_shader.is_valid():
+		if p_wire_shader.is_valid():
+			rd.free_rid(p_wire_shader)
+			p_wire_shader = RID()
+		p_wire_shader = new_wire_shader
+	else:
+		push_error("Wireframe Shader compilation failed, not replacing old shader")
+
+	if p_render_pipeline.is_valid():
+		rd.free_rid(p_render_pipeline)
+		p_render_pipeline = RID()
+
+	if p_wire_render_pipeline.is_valid():
+		rd.free_rid(p_wire_render_pipeline)
+		p_wire_render_pipeline = RID()
+	
+	#p_shader = compile_shader(source_vertex, source_fragment)
+	#p_wire_shader = compile_shader(source_vertex, source_wire_fragment)
 
 	var vertex_buffer := PackedFloat32Array([])
 	var half_length = (side_length - 1) / 2.0
@@ -144,31 +193,8 @@ func initialize_render(framebuffer_format : int):
 			for i in 3: vertex_buffer.push_back(pos[i])
 			for i in 4: vertex_buffer.push_back(color[i])
 
-
 	var vertex_count = vertex_buffer.size() / 7
 	print("Vertex Count: " + str(vertex_count))
-
-	# Dump vertex data, I would delete this but it's probably helpful definitely do not uncomment this if your mesh has more than a couple vertices
-	# for i in vertex_count:
-	#     var j = i * 7
-	#     var pos = Vector3()
-
-	#     pos.x = vertex_buffer[j]
-	#     pos.y = vertex_buffer[j + 1]
-	#     pos.z = vertex_buffer[j + 2]
-
-	#     var color = Vector4()
-
-	#     color.x = vertex_buffer[j + 3]
-	#     color.y = vertex_buffer[j + 4]
-	#     color.z = vertex_buffer[j + 5]
-	#     color.w = vertex_buffer[j + 6]
-
-	#     print("Vertex " + str(i) + " ---")
-	#     print("Position: " + str(pos))
-	#     print("Color: " + str(color))
-
-
 
 	var index_buffer := PackedInt32Array([])
 	var wire_index_buffer := PackedInt32Array([])
@@ -223,7 +249,6 @@ func initialize_render(framebuffer_format : int):
 	p_index_array = rd.index_array_create(p_index_buffer, 0, index_buffer.size())
 	p_wire_index_array = rd.index_array_create(p_wire_index_buffer, 0, wire_index_buffer.size())
 	
-
 	initialize_render_pipelines(framebuffer_format)
 
 # Initialization of the render pipeline objects is separated from the above code so that we don't have to regenerate everything when the framebuffer format changes
@@ -275,11 +300,11 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	var buffer = Array()
 
 	# Assemble the model, view, and projection matrices for vertex world space -> clip space conversion (watch PS1 video if you care about how this works but otherwise it just works(tm))
-	var model = transform
+	var model_matrix = transform
 	var view = render_scene_data.get_cam_transform().inverse()
 	var projection = render_scene_data.get_view_projection(0)
 
-	var model_view = Projection(view * model)
+	var model_view = Projection(view * model_matrix)
 	var MVP = projection * model_view;
 	
 	# Store MVP matrix in gpu data buffer
@@ -298,45 +323,105 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 			push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
 	else:
 		light_direction = light.transform.basis.z.normalized()
-
+		
+	
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
+
+	# MODEL_MATRIX (mat4)
+	buffer.push_back(model_matrix.basis.x.x)
+	buffer.push_back(model_matrix.basis.y.x)
+	buffer.push_back(model_matrix.basis.z.x)
+	buffer.push_back(model_matrix.origin.x)
+
+	buffer.push_back(model_matrix.basis.x.y)
+	buffer.push_back(model_matrix.basis.y.y)
+	buffer.push_back(model_matrix.basis.z.y)
+	buffer.push_back(model_matrix.origin.y)
+
+	buffer.push_back(model_matrix.basis.x.z)
+	buffer.push_back(model_matrix.basis.y.z)
+	buffer.push_back(model_matrix.basis.z.z)
+	buffer.push_back(model_matrix.origin.z)
+
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
+
+	# _LowSlopeColor (vec4)
+	buffer.push_back(low_slope_color.r)
+	buffer.push_back(low_slope_color.g)
+	buffer.push_back(low_slope_color.b)
+	buffer.push_back(low_slope_color.a)
+
+	# _HighSlopeColor (vec4)
+	buffer.push_back(high_slope_color.r)
+	buffer.push_back(high_slope_color.g)
+	buffer.push_back(high_slope_color.b)
+	buffer.push_back(high_slope_color.a)
+
+	# _AmbientLight (vec4)
+	buffer.push_back(ambient_light.r)
+	buffer.push_back(ambient_light.g)
+	buffer.push_back(ambient_light.b)
+	buffer.push_back(ambient_light.a)
+
+	# fog_color (vec4)
+	buffer.push_back(fog_color.r)
+	buffer.push_back(fog_color.g)
+	buffer.push_back(fog_color.b)
+	buffer.push_back(fog_color.a)
+
+	# _LightDirection (vec3) + _GradientRotation (float)
 	buffer.push_back(light_direction.x)
 	buffer.push_back(light_direction.y)
 	buffer.push_back(light_direction.z)
 	buffer.push_back(gradient_rotation)
-	buffer.push_back(rotation)
-	buffer.push_back(height_scale)
-	buffer.push_back(angular_variance.x)
-	buffer.push_back(angular_variance.y)
-	buffer.push_back(zoom)
-	buffer.push_back(octave_count)
-	buffer.push_back(amplitude_decay)
-	buffer.push_back(1.0)
+
+	# _Offset (vec3) + _NoiseRotation (float)
 	buffer.push_back(offset.x)
 	buffer.push_back(offset.y)
 	buffer.push_back(offset.z)
-	buffer.push_back(noise_seed)
-	buffer.push_back(initial_amplitude)
-	buffer.push_back(lacunarity)
-	buffer.push_back(slope_threshold.x)
+	buffer.push_back(rotation)
+
+	# Grab latest camera world position directly
+	camera_position = render_scene_data.get_cam_transform().origin
+
+	# camera_position (vec3) + _TerrainHeight (float)
+	buffer.push_back(camera_position.x)
+	buffer.push_back(camera_position.y)
+	buffer.push_back(camera_position.z)
+	buffer.push_back(height_scale)
+
+	# _AngularVariance (vec2) + _SlopeRange (vec2)
+	buffer.push_back(angular_variance.x)
+	buffer.push_back(angular_variance.y)
+	buffer.push_back(slope_threshold.x) 
 	buffer.push_back(slope_threshold.y)
-	buffer.push_back(low_slope_color.r)
-	buffer.push_back(low_slope_color.g)
-	buffer.push_back(low_slope_color.b)
-	buffer.push_back(1.0)
-	buffer.push_back(high_slope_color.r)
-	buffer.push_back(high_slope_color.g)
-	buffer.push_back(high_slope_color.b)
-	buffer.push_back(1.0)
-	buffer.push_back(frequency_variance.x)
-	buffer.push_back(frequency_variance.y)
-	buffer.push_back(slope_damping)
-	buffer.push_back(1.0)
-	buffer.push_back(ambient_light.r)
-	buffer.push_back(ambient_light.g)
-	buffer.push_back(ambient_light.b)
-	buffer.push_back(1.0)
+
+	# Floats (4 + 4 + 4 + ...)
+	buffer.push_back(zoom) # _Scale
+	buffer.push_back(octave_count) # _Octaves
+	buffer.push_back(amplitude_decay) # _AmplitudeDecay
+	buffer.push_back(1.0) # _NormalStrength
+
+	buffer.push_back(noise_seed) # _Seed
+	buffer.push_back(initial_amplitude) # _InitialAmplitude
+	buffer.push_back(lacunarity) # _Lacunarity
+	buffer.push_back(slope_damping) # _SlopeDamping
+
+	buffer.push_back(frequency_variance.x) # _FrequencyVarianceLowerBound
+	buffer.push_back(frequency_variance.y) # _FrequencyVarianceUpperBound
+	buffer.push_back(fog_start)
+	buffer.push_back(fog_density)
 	
+	buffer.push_back(fog_height_fade)
+	buffer.push_back(0.0)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
+
+	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT if byte size error
+	#print("Expected Floats:", 80)
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
@@ -402,33 +487,47 @@ func _notification(what):
 			rd.free_rid(p_wire_index_buffer)
 
 
-
 const source_vertex = "
 		#version 450
 
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the fragment shader.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
+			mat4 MODEL_MATRIX; // 16
+			
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color; // 4
+			
 			vec3 _LightDirection;
 			float _GradientRotation;
-			float _NoiseRotation;
-			float _TerrainHeight;
+			
+			vec3 _Offset;
+			float _NoiseRotation; 
+			
+			vec3 camera_position;
+			float _TerrainHeight; // 3 + 1
+			
 			vec2 _AngularVariance;
+			vec2 _SlopeRange; // 2 + 2
+			
 			float _Scale;
 			float _Octaves;
 			float _AmplitudeDecay;
 			float _NormalStrength;
-			vec3 _Offset;
+			
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
+			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
+			
+			float fog_start;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		// This is the vertex data layout that we defined in initialize_render after line 198
@@ -438,6 +537,7 @@ const source_vertex = "
 		// This is what the vertex shader will output and send to the fragment shader.
 		layout(location = 2) out vec4 v_Color;
 		layout(location = 3) out vec3 pos;
+		layout(location = 4) out vec3 frag_world_pos;
 
 		#define PI 3.141592653589793238462
 		
@@ -575,6 +675,7 @@ const source_vertex = "
 		void main() {
 			// Passes the vertex color over to the fragment shader, even though we don't use it but you can use it if you want I guess
 			v_Color = a_Color;
+			frag_world_pos = (MODEL_MATRIX * vec4(a_Position, 1.0)).xyz;
 
 			// The fragment shader also calculates the fractional brownian motion for pixel perfect normal vectors and lighting, so we pass the vertex position to the fragment shader
 			pos = a_Position;
@@ -593,38 +694,53 @@ const source_vertex = "
 		}
 		"
 
-
 const source_fragment = "
 		#version 450
 
 		// This is the uniform buffer that contains all of the settings we sent over from the cpu in _render_callback. Must match with the one in the vertex shader, they're technically the same thing occupying the same spot in memory this is just duplicate code required for compilation.
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 			mat4 MVP;
+			mat4 MODEL_MATRIX; // 16
+			
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color; // 4
+			
 			vec3 _LightDirection;
 			float _GradientRotation;
-			float _NoiseRotation;
-			float _TerrainHeight;
+			
+			vec3 _Offset;
+			float _NoiseRotation; 
+			
+			vec3 camera_position;
+			float _TerrainHeight; // 3 + 1
+			
 			vec2 _AngularVariance;
+			vec2 _SlopeRange; // 2 + 2
+			
 			float _Scale;
 			float _Octaves;
 			float _AmplitudeDecay;
 			float _NormalStrength;
-			vec3 _Offset;
+			
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
+			
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
+			
+			float fog_start;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		// These are the variables that we expect to receive from the vertex shader
 		layout(location = 2) in vec4 a_Color;
 		layout(location = 3) in vec3 pos;
+		layout(location = 4) in vec3 frag_world_pos;
 		
 		// This is what the fragment shader will output, usually just a pixel color
 		layout(location = 0) out vec4 frag_color;
@@ -793,6 +909,20 @@ const source_fragment = "
 
 			// Convert from linear rgb to srgb for proper color output, ideally you'd do this as some final post processing effect because otherwise you will need to revert this gamma correction elsewhere
 			frag_color = pow(lit, vec4(2.2));
+			
+			lit = pow(lit, vec4(2.2)); // Gamma correct
+
+			// Fog
+			float dist = length(frag_world_pos - camera_position);
+			dist = max(0.0, dist - fog_start);
+
+			float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
+			float density = fog_density * height_factor;
+
+			// Compute Beer's Law transmittance:
+			float transmittance = exp(-dist * density);
+
+			frag_color = mix(fog_color, lit, transmittance);
 		}
 		"
 
@@ -801,27 +931,33 @@ const source_wire_fragment = "
 		#version 450
 
 		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
-			mat4 MVP; // 64 -> 0
-			vec3 _LightDirection; // 16 -> 64
+			mat4 MVP;
+			mat4 MODEL_MATRIX;
+			vec4 _LowSlopeColor;
+			vec4 _HighSlopeColor;
+			vec4 _AmbientLight;
+			vec4 fog_color;
+			vec3 _LightDirection;
 			float _GradientRotation;
-			float _NoiseRotation; // 4 -> 80
-			float _Amplitude; // 4 -> 84
-			vec2 _AngularVariance; // 8 -> 88
-			float _Frequency; // 4 -> 96
-			float _Octaves; // 4 -> 100
-			float _AmplitudeDecay; // 4 -> 104
-			float _NormalStrength; // 4  -> 108
-			vec3 _Offset; // 16 -> 112 -> 128
+			vec3 _Offset;
+			float _NoiseRotation; 
+			vec3 camera_position;
+			float _TerrainHeight;
+			vec2 _AngularVariance;
+			vec2 _SlopeRange;
+			float _Scale;
+			float _Octaves;
+			float _AmplitudeDecay;
+			float _NormalStrength;
 			float _Seed;
 			float _InitialAmplitude;
 			float _Lacunarity;
-			vec2 _SlopeRange;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
+			float _SlopeDamping;
 			float _FrequencyVarianceLowerBound;
 			float _FrequencyVarianceUpperBound;
-			float _SlopeDamping;
-			vec4 _AmbientLight;
+			float fog_start;
+			float fog_density;
+			float fog_height_fade;
 		};
 		
 		layout(location = 2) in vec4 a_Color;
