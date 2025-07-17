@@ -1,0 +1,1 @@
+// Shared lighting functions
