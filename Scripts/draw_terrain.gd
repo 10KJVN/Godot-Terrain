@@ -113,6 +113,12 @@ var p_shader : RID
 var p_wire_shader : RID
 var clear_colors := PackedColorArray([Color.DARK_BLUE])
 
+const ShaderPreprocessor = preload("res://Scripts/shader_preprocessor.gd")
+
+func _test_shader_include():
+	var code := ShaderPreprocessor.preprocess_shader("res://shaders/includes/fog.glsl")
+	print(code) # You should see the full inlined shader code in the debugger.
+
 func _init():
 	effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 	
@@ -122,6 +128,8 @@ func _init():
 	var tree := Engine.get_main_loop() as SceneTree
 	var root : Node = tree.edited_scene_root if Engine.is_editor_hint() else tree.current_scene
 	if root: light = root.get_node_or_null('DirectionalLight3D')
+	
+	_test_shader_include()
 
 # Compiles... the shader...?
 func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
