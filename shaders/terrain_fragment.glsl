@@ -1,5 +1,6 @@
 #version 450
 
+#define PI 3.141592653589793238462
 // This is the uniform buffer that contains all of the settings we sent over
 // from the cpu in _render_callback. Must match with the one in the vertex
 // shader, they're technically the same thing occupying the same spot in memory
@@ -55,7 +56,6 @@ layout(location = 4) in vec3 frag_world_pos;
 // This is what the fragment shader will output, usually just a pixel color
 layout(location = 0) out vec4 frag_color;
 
-#define PI 3.141592653589793238462
 
 void main() {
   // Recalculate initial noise sampling position same as vertex shader

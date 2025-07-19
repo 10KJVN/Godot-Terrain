@@ -1,5 +1,6 @@
 #version 450
 
+#define PI 3.141592653589793238462
 // This is the uniform buffer that contains all of the settings we sent over
 // from the cpu in _render_callback. Must match with the one in the fragment
 // shader.
@@ -56,7 +57,6 @@ layout(location = 2) out vec4 v_Color;
 layout(location = 3) out vec3 pos;
 layout(location = 4) out vec3 frag_world_pos;
 
-#define PI 3.141592653589793238462
 
 void main() {
   // Passes the vertex color over to the fragment shader, even though we don't
