@@ -1,1 +1,0 @@
-// fog uniforms + logic
