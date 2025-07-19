@@ -140,7 +140,7 @@ func _init():
 	if root: light = root.get_node_or_null('DirectionalLight3D')
 	
 	#_test_shader_include()
-	#source_vertex = _load_glsl("res://shaders/terrain_vertex.glsl")
+	source_vertex = _load_glsl("res://shaders/terrain_vertex.glsl")
 	source_fragment = _load_glsl("res://shaders/terrain_fragment.glsl")
 
 
@@ -306,6 +306,10 @@ func initialize_render_pipelines(framebuffer_format : int) -> void:
 func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if not enabled: return
 	if _effect_callback_type != effect_callback_type: return
+	
+	if Engine.is_editor_hint():
+		return
+
 	
 	var render_scene_buffers : RenderSceneBuffersRD = render_data.get_render_scene_buffers()
 	var render_scene_data : RenderSceneData = render_data.get_render_scene_data()
