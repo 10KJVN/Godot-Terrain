@@ -28,6 +28,7 @@ static func preprocess_shader(path: String, include_dir: String = "res://shaders
 			else:
 				push_error("Malformed #include directive: " + line)
 		else:
-			shader_code += line + "\n"
+			if not line.begins_with("#include"):
+				shader_code += line + "\n"
 
 	return shader_code

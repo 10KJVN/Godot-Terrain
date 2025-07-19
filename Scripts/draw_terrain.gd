@@ -119,7 +119,7 @@ var source_fragment := _load_glsl("res://shaders/terrain_fragment.glsl")
 
 
 func _test_shader_include():
-	var code := ShaderPreprocessor.preprocess_shader("res://shaders/terrain_vertex.glsl")
+	var code := ShaderPreprocessor.preprocess_shader("res://shaders/includes/random.glsl")
 	print(code) # You should see the full inlined shader code in the debugger.
 
 func _load_glsl(path: String) -> String:
@@ -139,9 +139,9 @@ func _init():
 	var root : Node = tree.edited_scene_root if Engine.is_editor_hint() else tree.current_scene
 	if root: light = root.get_node_or_null('DirectionalLight3D')
 	
-	#_test_shader_include()
-	source_vertex = _load_glsl("res://shaders/terrain_vertex.glsl")
-	source_fragment = _load_glsl("res://shaders/terrain_fragment.glsl")
+	_test_shader_include()
+	source_vertex = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_vertex.glsl")
+	source_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_fragment.glsl")
 
 
 func _ready():
