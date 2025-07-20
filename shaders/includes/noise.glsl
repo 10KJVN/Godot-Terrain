@@ -104,4 +104,6 @@ vec3 fbm(vec2 pos) {
     // apply frequency adjustment to sample position for next noise layer
     pos = (lacunarity + freq_variance) * m2 * pos;
     m = (lacunarity + freq_variance) * m2i * m;
-  }
+  } 
+return vec3(height, grad);
+}

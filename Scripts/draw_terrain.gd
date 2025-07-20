@@ -139,7 +139,7 @@ func _init():
 	var root : Node = tree.edited_scene_root if Engine.is_editor_hint() else tree.current_scene
 	if root: light = root.get_node_or_null('DirectionalLight3D')
 	
-	_test_shader_include()
+	#_test_shader_include()
 	source_vertex = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_vertex.glsl")
 	source_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_fragment.glsl")
 
@@ -156,6 +156,9 @@ func compile_shader(vertex_shader : String, fragment_shader : String) -> RID:
 	var src := RDShaderSource.new()
 	src.source_vertex = vertex_shader
 	src.source_fragment = fragment_shader
+	
+	#print("\n=== VERTEX SHADER SOURCE ===\n", source_vertex)
+	#print("\n=== FRAGMENT SHADER SOURCE ===\n", source_fragment)
 	
 	var shader_spirv : RDShaderSPIRV = rd.shader_compile_spirv_from_source(src)
 	
