@@ -116,6 +116,7 @@ var clear_colors := PackedColorArray([Color.DARK_BLUE])
 const ShaderPreprocessor = preload("res://Scripts/shader_preprocessor.gd")
 var source_vertex := _load_glsl("res://shaders/terrain_vertex.glsl")
 var source_fragment := _load_glsl("res://shaders/terrain_fragment.glsl")
+var source_wire_fragment := _load_glsl("res://shaders/terrain_wireframe.glsl")
 
 
 func _test_shader_include():
@@ -142,6 +143,7 @@ func _init():
 	#_test_shader_include()
 	source_vertex = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_vertex.glsl")
 	source_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_fragment.glsl")
+	source_wire_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_wireframe.glsl")
 
 
 func _ready():
@@ -520,47 +522,3 @@ func _notification(what):
 			rd.free_rid(p_wire_index_array)
 		if p_wire_index_buffer.is_valid():
 			rd.free_rid(p_wire_index_buffer)
-
-
-# I am not going to explain the wireframe shader it's pretty straight forward okay thanks
-const source_wire_fragment = "
-		#version 450
-
-		layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
-			mat4 MVP;
-			mat4 MODEL_MATRIX;
-			vec4 _LowSlopeColor;
-			vec4 _HighSlopeColor;
-			vec4 _AmbientLight;
-			vec4 fog_color;
-			vec3 _LightDirection;
-			float _GradientRotation;
-			vec3 _Offset;
-			float _NoiseRotation; 
-			vec3 camera_position;
-			float _TerrainHeight;
-			vec2 _AngularVariance;
-			vec2 _SlopeRange;
-			float _Scale;
-			float _Octaves;
-			float _AmplitudeDecay;
-			float _NormalStrength;
-			float _Seed;
-			float _InitialAmplitude;
-			float _Lacunarity;
-			float _SlopeDamping;
-			float _FrequencyVarianceLowerBound;
-			float _FrequencyVarianceUpperBound;
-			float fog_start;
-			float fog_density;
-			float fog_height_fade;
-		};
-		
-		layout(location = 2) in vec4 a_Color;
-		
-		layout(location = 0) out vec4 frag_color;
-		
-		void main(){
-			frag_color = vec4(1, 0, 0, 1);
-		}
-		"
