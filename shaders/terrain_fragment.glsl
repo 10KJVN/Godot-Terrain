@@ -71,6 +71,8 @@ void main() {
     float dist = length(frag_world_pos - camera_position);
     dist = max(0.0, dist - fog_start);
     float lod_factor = smoothstep(20.0, 80.0, dist);
+    // TODO: Extend LOD to affect noise octaves or skip heavy effects.
+    // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
 
     // Lighting
     vec3 normal = normalize(vec3(-n.y, 1, -n.z));
