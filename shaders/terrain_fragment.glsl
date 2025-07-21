@@ -107,6 +107,9 @@ void main() {
   float dist = length(frag_world_pos - camera_position);
   dist = max(0.0, dist - fog_start);
 
+  // LOD factor based on distance
+  float lod_factor = smoothstep(20.0, 80.0, dist);
+
   float height_factor = clamp(
       1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
   float density = fog_density * height_factor;
