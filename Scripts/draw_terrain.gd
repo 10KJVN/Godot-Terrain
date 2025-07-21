@@ -312,10 +312,6 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if not enabled: return
 	if _effect_callback_type != effect_callback_type: return
 	
-	if Engine.is_editor_hint():
-		return
-
-	
 	var render_scene_buffers : RenderSceneBuffersRD = render_data.get_render_scene_buffers()
 	var render_scene_data : RenderSceneData = render_data.get_render_scene_data()
 	
