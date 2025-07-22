@@ -92,7 +92,7 @@ var fog_start : float = 100.0
 @export var ambient_light : Color = Color.DIM_GRAY
 
 ## Direction the light is coming from (should be normalized in shader)
-var light_direction : Vector3 = Vector3(-0.5, -1.0, -0.5)
+var light_direction : Vector3 = Vector3(-0.25, -1.0, -0.25)
 
 ## Color of the directional light (affects both diffuse and specular)
 @export var light_color : Color = Color(1.0, 1.0, 1.0)
