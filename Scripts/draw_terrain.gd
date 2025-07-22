@@ -92,7 +92,7 @@ var fog_start : float = 100.0
 @export var ambient_light : Color = Color.DIM_GRAY
 
 ## Direction the light is coming from (should be normalized in shader)
-@export var light_direction : Vector3 = Vector3(-0.5, -1.0, -0.5)
+var light_direction : Vector3 = Vector3(-0.5, -1.0, -0.5)
 
 ## Color of the directional light (affects both diffuse and specular)
 @export var light_color : Color = Color(1.0, 1.0, 1.0)
@@ -359,7 +359,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		buffer.push_back(MVP[i / 4][i % 4])
 
 	# Default light direction if no light source is found
-	var light_direction = Vector3(0, 1, 0)
+	var _fallback_light_direction = Vector3(0, 1, 0)
 
 	# Attempt to find a light source if no light source was found earlier
 	if not light:
@@ -369,7 +369,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		if not light:
 			push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
 	else:
-		light_direction = light.transform.basis.z.normalized()
+		_fallback_light_direction = light.transform.basis.z.normalized()
 		
 	
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space

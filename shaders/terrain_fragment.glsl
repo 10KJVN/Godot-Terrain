@@ -85,22 +85,23 @@ void main() {
     vec3 lod_normal = normalize(mix(normal, vec3(0, 1, 0), lod_factor));
     vec3 light_dir = normalize(_LightDirection);
     vec3 view_direction = normalize(view_dir);
-    vec3 half_vector = normalize(light_dir + view_direction);
 
     // Diffuse
     float ndotl = clamp(dot(light_dir, lod_normal), 0.0, 1.0);
     vec4 diffuse = albedo * ndotl;
 
     // Specular
+    vec3 half_vector = normalize(light_dir + view_direction);
     float spec_angle = clamp(dot(lod_normal, half_vector), 0.0, 1.0);
-    float specular_strength = pow(spec_angle, 32.0); // 32 = sharpness
-    vec4 specular = vec4(vec3(specular_strength * 0.3), 0.0); // 0.3 = intensity
+    float spec_factor = pow(spec_angle, _Shininess);
+    vec3 specular = _LightColor * _LightIntensity * _SpecularStrength * spec_factor;
+    vec4 specular_final = vec4(specular, 0.0);
 
     // Ambient
     vec4 ambient = albedo * _AmbientLight;
 
     // Combine lighting
-    vec4 lit = clamp(diffuse + specular + ambient, 0.0, 1.0);
+    vec4 lit = clamp(diffuse + specular_final + ambient, 0.0, 1.0);
     lit = pow(lit, vec4(2.2)); // gamma correction
 
     // Fog
@@ -117,5 +118,9 @@ void main() {
 
     /*vec3 highlight = vec3(pow(max(dot(normal, normalize(_LightDirection + view_dir)), 0.0), 16.0));
     frag_color = vec4(highlight, 1.0);*/ //  Blinn-Phong visualizer
+
+    //frag_color = vec4(specular, 1.0); // Specular intensity visualizer
+    //frag_color = vec4(vec3(spec_factor), 1.0); //Specular factor
+    
     
 }
