@@ -70,8 +70,8 @@ void main() {
 
     // LOD Factor
     float dist = length(frag_world_pos - camera_position);
-    dist = max(0.0, dist - fog_start);
-    float lod_factor = smoothstep(20.0, 80.0, dist);
+    float raw_dist = max(0.0, dist - fog_start);
+    float lod_factor = smoothstep(20.0, 80.0, raw_dist);
     // TODO: Extend LOD to affect noise octaves or skip heavy effects.
     // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
 
@@ -99,9 +99,10 @@ void main() {
     lit = pow(lit, vec4(2.2)); // gamma correction
 
     // Fog
+    float fog_dist = max(0.0, raw_dist - fog_start);
     float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
     float density = fog_density * height_factor;
-    float transmittance = exp(-dist * density);
+    float transmittance = exp(-fog_dist * density);
 
     // Output
     frag_color = mix(fog_color, lit, transmittance);
