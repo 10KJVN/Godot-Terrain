@@ -73,7 +73,7 @@ class_name DrawTerrainMesh extends CompositorEffect
 @export_group("Fog Settings")
 
 ## Fades terrain color into a customizable fog_color as distance increases.
-@export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
+@export var fog_color : Color = Color(0.75, 0.78, 0.85, 1.0)
 
 ## Controls how thick the fog is (higher = denser fog at shorter distances).
 @export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02
@@ -91,6 +91,20 @@ var fog_start : float = 100.0
 ## Additive light adjustment
 @export var ambient_light : Color = Color.DIM_GRAY
 
+## Direction the light is coming from (should be normalized in shader)
+var light_direction : Vector3 = Vector3(-0.25, -1.0, -0.25)
+
+## Color of the directional light (affects both diffuse and specular)
+@export var light_color : Color = Color(1.0, 1.0, 1.0)
+
+## Intensity multiplier for diffuse lighting
+@export_range(0.0, 10.0, 0.01) var light_intensity : float = 1.0
+
+## Intensity multiplier for specular highlights
+@export_range(0.0, 10.0, 0.01) var specular_strength : float = 0.5
+
+## Exponent controlling specular shininess — higher = tighter highlight
+@export_range(1.0, 256.0, 1.0) var shininess : float = 32.0
 
 var transform : Transform3D
 var light : DirectionalLight3D
@@ -345,7 +359,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		buffer.push_back(MVP[i / 4][i % 4])
 
 	# Default light direction if no light source is found
-	var light_direction = Vector3(0, 1, 0)
+	var _fallback_light_direction = Vector3(0, 1, 0)
 
 	# Attempt to find a light source if no light source was found earlier
 	if not light:
@@ -355,7 +369,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		if not light:
 			push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
 	else:
-		light_direction = light.transform.basis.z.normalized()
+		_fallback_light_direction = light.transform.basis.z.normalized()
 		
 	
 	# Store all shader uniforms in a gpu data buffer, this isn't exactly the optimal data layout, each 1.0 push back is wasted space
@@ -452,6 +466,19 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	buffer.push_back(1.0)
+	
+	# _LightColor (vec3) + _LightIntensity (float)
+	buffer.push_back(light_color.r)
+	buffer.push_back(light_color.g)
+	buffer.push_back(light_color.b)
+	buffer.push_back(light_intensity)
+
+	# _SpecularColor (vec3) + _SpecularPower (float)
+	buffer.push_back(specular_strength)
+	buffer.push_back(shininess)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
+
 
 	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT if byte size error
 	#print("Expected Floats:", 80)

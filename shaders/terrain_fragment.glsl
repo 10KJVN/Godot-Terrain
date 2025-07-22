@@ -41,6 +41,11 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   float fog_start;
   float fog_density;
   float fog_height_fade;
+
+  vec3 _LightColor;
+  float _LightIntensity;
+  float _SpecularStrength;
+  float _Shininess;
 };
 
 
@@ -48,6 +53,7 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 layout(location = 2) in vec4 a_Color;
 layout(location = 3) in vec3 pos;
 layout(location = 4) in vec3 frag_world_pos;
+layout(location = 5) in vec3 view_dir;
 
 // This is what the fragment shader will output, usually just a pixel color - Output
 layout(location = 0) out vec4 frag_color;
@@ -69,28 +75,52 @@ void main() {
 
     // LOD Factor
     float dist = length(frag_world_pos - camera_position);
-    dist = max(0.0, dist - fog_start);
-    float lod_factor = smoothstep(20.0, 80.0, dist);
+    float raw_dist = max(0.0, dist - fog_start);
+    float lod_factor = smoothstep(20.0, 80.0, raw_dist);
     // TODO: Extend LOD to affect noise octaves or skip heavy effects.
     // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
 
-    // Lighting
+    // Lighting: Blinn-Phong
     vec3 normal = normalize(vec3(-n.y, 1, -n.z));
     vec3 lod_normal = normalize(mix(normal, vec3(0, 1, 0), lod_factor));
-    float ndotl = clamp(dot(_LightDirection, lod_normal), 0.0, 1.0);
-    vec4 direct_light = albedo * ndotl;
-    vec4 ambient_light = albedo * _AmbientLight;
-    vec4 lit = clamp(direct_light + ambient_light, vec4(0), vec4(1));
+    vec3 light_dir = normalize(_LightDirection);
+    vec3 view_direction = normalize(view_dir);
 
-    // Fog Calculation
+    // Diffuse
+    float ndotl = clamp(dot(light_dir, lod_normal), 0.0, 1.0);
+    vec4 diffuse = albedo * ndotl;
+
+    // Specular
+    vec3 half_vector = normalize(light_dir + view_direction);
+    float spec_angle = clamp(dot(lod_normal, half_vector), 0.0, 1.0);
+    float spec_factor = pow(spec_angle, _Shininess);
+    vec3 specular = _LightColor * _LightIntensity * _SpecularStrength * spec_factor;
+    vec4 specular_final = vec4(specular, 0.0);
+
+    // Ambient
+    vec4 ambient = albedo * _AmbientLight;
+
+    // Combine lighting
+    vec4 lit = clamp(diffuse + specular_final + ambient, 0.0, 1.0);
+    lit = pow(lit, vec4(2.2)); // gamma correction
+
+    // Fog
+    float fog_dist = max(0.0, raw_dist - fog_start);
     float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
     float density = fog_density * height_factor;
-    float transmittance = exp(-dist * density);
+    float transmittance = exp(-fog_dist * density);
 
-    // Final Output
-    lit = pow(lit, vec4(2.2)); // Gamma correct
+    // Output
     frag_color = mix(fog_color, lit, transmittance);
 
     // DEBUG Outputs
     //frag_color = vec4(vec3(1.0 - lod_factor), 1.0); // LOD visualizer
+
+    /*vec3 highlight = vec3(pow(max(dot(normal, normalize(_LightDirection + view_dir)), 0.0), 16.0));
+    frag_color = vec4(highlight, 1.0);*/ //  Blinn-Phong visualizer
+
+    //frag_color = vec4(specular, 1.0); // Specular intensity visualizer
+    //frag_color = vec4(vec3(spec_factor), 1.0); //Specular factor
+    
+    
 }
