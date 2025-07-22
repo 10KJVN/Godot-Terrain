@@ -91,6 +91,20 @@ var fog_start : float = 100.0
 ## Additive light adjustment
 @export var ambient_light : Color = Color.DIM_GRAY
 
+## Direction the light is coming from (should be normalized in shader)
+@export var light_direction : Vector3 = Vector3(-0.5, -1.0, -0.5)
+
+## Color of the directional light (affects both diffuse and specular)
+@export var light_color : Color = Color(1.0, 1.0, 1.0)
+
+## Intensity multiplier for diffuse lighting
+@export_range(0.0, 10.0, 0.01) var light_intensity : float = 1.0
+
+## Intensity multiplier for specular highlights
+@export_range(0.0, 10.0, 0.01) var specular_strength : float = 0.5
+
+## Exponent controlling specular shininess — higher = tighter highlight
+@export_range(1.0, 256.0, 1.0) var shininess : float = 32.0
 
 var transform : Transform3D
 var light : DirectionalLight3D
@@ -452,6 +466,19 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(0.0)
 	buffer.push_back(0.0)
 	buffer.push_back(1.0)
+	
+	# _LightColor (vec3) + _LightIntensity (float)
+	buffer.push_back(light_color.r)
+	buffer.push_back(light_color.g)
+	buffer.push_back(light_color.b)
+	buffer.push_back(light_intensity)
+
+	# _SpecularColor (vec3) + _SpecularPower (float)
+	buffer.push_back(specular_strength)
+	buffer.push_back(shininess)
+	buffer.push_back(0.0)
+	buffer.push_back(1.0)
+
 
 	#print("Final Buffer Floats:", buffer.size()) #UNCOMMENT if byte size error
 	#print("Expected Floats:", 80)

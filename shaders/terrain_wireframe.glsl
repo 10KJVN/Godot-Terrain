@@ -28,6 +28,10 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   float fog_start;
   float fog_density;
   float fog_height_fade;
+  vec3 _LightColor;
+  float _LightIntensity;
+  float _SpecularStrength;
+  float _Shininess;
 };
 
 layout(location = 2) in vec4 a_Color;
