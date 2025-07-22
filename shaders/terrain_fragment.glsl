@@ -48,6 +48,7 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 layout(location = 2) in vec4 a_Color;
 layout(location = 3) in vec3 pos;
 layout(location = 4) in vec3 frag_world_pos;
+layout(location = 5) in vec3 view_dir;
 
 // This is what the fragment shader will output, usually just a pixel color - Output
 layout(location = 0) out vec4 frag_color;
@@ -82,6 +83,12 @@ void main() {
     vec4 ambient_light = albedo * _AmbientLight;
     vec4 lit = clamp(direct_light + ambient_light, vec4(0), vec4(1));
 
+    // Blinn-Phone (?)
+    vec3 half_vector = normalize(_LightDirection + view_dir);
+    float spec_angle = max(dot(normal, half_vector), 0.0);
+    float specular_strength = pow(spec_angle, 32.0);
+    vec3 specular = specular_strength * vec3(1.0); // White specular highlights
+
     // Fog Calculation
     float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
     float density = fog_density * height_factor;
@@ -89,8 +96,11 @@ void main() {
 
     // Final Output
     lit = pow(lit, vec4(2.2)); // Gamma correct
-    frag_color = mix(fog_color, lit, transmittance);
+    //frag_color = mix(fog_color, lit, transmittance);
 
     // DEBUG Outputs
     //frag_color = vec4(vec3(1.0 - lod_factor), 1.0); // LOD visualizer
+    vec3 highlight = vec3(pow(max(dot(normal, normalize(_LightDirection + view_dir)), 0.0), 16.0));
+    frag_color = vec4(highlight, 1.0);
+    
 }

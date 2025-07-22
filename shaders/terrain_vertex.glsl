@@ -56,6 +56,7 @@ layout(location = 1) in vec4 a_Color;
 layout(location = 2) out vec4 v_Color;
 layout(location = 3) out vec3 pos;
 layout(location = 4) out vec3 frag_world_pos;
+layout(location = 5) out vec3 view_dir;
 
 
 void main() {
@@ -63,6 +64,7 @@ void main() {
   // use it but you can use it if you want I guess
   v_Color = a_Color;
   frag_world_pos = (MODEL_MATRIX * vec4(a_Position, 1.0)).xyz;
+  view_dir = normalize(camera_position - frag_world_pos);
 
   // The fragment shader also calculates the fractional brownian motion for
   // pixel perfect normal vectors and lighting, so we pass the vertex position
