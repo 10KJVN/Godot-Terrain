@@ -73,7 +73,7 @@ class_name DrawTerrainMesh extends CompositorEffect
 @export_group("Fog Settings")
 
 ## Fades terrain color into a customizable fog_color as distance increases.
-@export var fog_color : Color = Color(1.0, 0.5, 0.9, 1.0) # pink by default
+@export var fog_color : Color = Color(0.75, 0.78, 0.85, 1.0)
 
 ## Controls how thick the fog is (higher = denser fog at shorter distances).
 @export_range(0.001, 1.0, 0.001) var fog_density : float = 0.02

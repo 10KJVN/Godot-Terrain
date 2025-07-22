@@ -14,7 +14,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("2_txr6u")
 regenerate = false
-camera_position = Vector3(-60.064, 73.4201, -0.177165)
+camera_position = Vector3(-33.1838, 75.2516, 20.7784)
 side_length = 256
 mesh_scale = 0.5
 wireframe = false
@@ -39,10 +39,10 @@ fog_density = 0.007
 fog_height_fade = 0.79
 fog_start = 75.0
 ambient_light = Color(0.192157, 0.270588, 0.301961, 1)
-light_color = Color(1, 0.952941, 0.858824, 1)
-light_intensity = 0.75
-specular_strength = 0.2
-shininess = 16.0
+light_color = Color(1, 1, 1, 1)
+light_intensity = 1.25
+specular_strength = 0.35
+shininess = 32.0
 metadata/_custom_type_script = "uid://7n58awc2ols0"
 
 [sub_resource type="Compositor" id="Compositor_w1s2y"]
