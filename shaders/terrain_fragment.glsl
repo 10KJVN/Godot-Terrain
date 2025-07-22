@@ -75,32 +75,41 @@ void main() {
     // TODO: Extend LOD to affect noise octaves or skip heavy effects.
     // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
 
-    // Lighting
+    // Lighting: Blinn-Phong
     vec3 normal = normalize(vec3(-n.y, 1, -n.z));
     vec3 lod_normal = normalize(mix(normal, vec3(0, 1, 0), lod_factor));
-    float ndotl = clamp(dot(_LightDirection, lod_normal), 0.0, 1.0);
-    vec4 direct_light = albedo * ndotl;
-    vec4 ambient_light = albedo * _AmbientLight;
-    vec4 lit = clamp(direct_light + ambient_light, vec4(0), vec4(1));
+    vec3 light_dir = normalize(_LightDirection);
+    vec3 view_direction = normalize(view_dir);
+    vec3 half_vector = normalize(light_dir + view_direction);
 
-    // Blinn-Phone (?)
-    vec3 half_vector = normalize(_LightDirection + view_dir);
-    float spec_angle = max(dot(normal, half_vector), 0.0);
-    float specular_strength = pow(spec_angle, 32.0);
-    vec3 specular = specular_strength * vec3(1.0); // White specular highlights
+    // Diffuse
+    float ndotl = clamp(dot(light_dir, lod_normal), 0.0, 1.0);
+    vec4 diffuse = albedo * ndotl;
 
-    // Fog Calculation
+    // Specular
+    float spec_angle = clamp(dot(lod_normal, half_vector), 0.0, 1.0);
+    float specular_strength = pow(spec_angle, 32.0); // 32 = sharpness
+    vec4 specular = vec4(vec3(specular_strength * 0.3), 0.0); // 0.3 = intensity
+
+    // Ambient
+    vec4 ambient = albedo * _AmbientLight;
+
+    // Combine lighting
+    vec4 lit = clamp(diffuse + specular + ambient, 0.0, 1.0);
+    lit = pow(lit, vec4(2.2)); // gamma correction
+
+    // Fog
     float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
     float density = fog_density * height_factor;
     float transmittance = exp(-dist * density);
 
-    // Final Output
-    lit = pow(lit, vec4(2.2)); // Gamma correct
-    //frag_color = mix(fog_color, lit, transmittance);
+    // Output
+    frag_color = mix(fog_color, lit, transmittance);
 
     // DEBUG Outputs
     //frag_color = vec4(vec3(1.0 - lod_factor), 1.0); // LOD visualizer
-    vec3 highlight = vec3(pow(max(dot(normal, normalize(_LightDirection + view_dir)), 0.0), 16.0));
-    frag_color = vec4(highlight, 1.0);
+
+    /*vec3 highlight = vec3(pow(max(dot(normal, normalize(_LightDirection + view_dir)), 0.0), 16.0));
+    frag_color = vec4(highlight, 1.0);*/ //  Blinn-Phong visualizer
     
 }
