@@ -1,0 +1,81 @@
+[gd_scene load_steps=6 format=3 uid="uid://etlrqir3d7md"]
+
+[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_pp484"]
+[ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="2_lr1yk"]
+
+[sub_resource type="Environment" id="Environment_7owt0"]
+background_mode = 1
+background_color = Color(0.239216, 0.239216, 0.239216, 1)
+tonemap_mode = 3
+glow_enabled = true
+glow_levels/1 = 1.2
+glow_levels/2 = 10.05
+glow_levels/3 = 7.2
+glow_levels/4 = 19.7
+glow_levels/5 = 6.05
+glow_levels/6 = 2.95
+glow_levels/7 = 4.25
+glow_normalized = true
+glow_intensity = 1.75
+glow_strength = 1.65
+glow_bloom = 0.07
+glow_blend_mode = 1
+fog_enabled = true
+fog_light_color = Color(0.717647, 0.423529, 0.717647, 1)
+adjustment_enabled = true
+
+[sub_resource type="CompositorEffect" id="CompositorEffect_vvh5c"]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("2_lr1yk")
+regenerate = false
+camera_position = Vector3(-18.8967, 61.7358, -172.161)
+side_length = 400
+mesh_scale = 0.5
+wireframe = false
+noise_seed = 135
+zoom = 139.5
+offset = Vector3(-200, 95.655, -326.08)
+gradient_rotation = 68.645
+octave_count = 12
+rotation = -26.99
+angular_variance = Vector2(-15, 15)
+initial_amplitude = 0.739
+amplitude_decay = 0.439
+lacunarity = 1.991
+frequency_variance = Vector2(-0.085, 0.115)
+height_scale = 90.9
+slope_damping = 0.155
+slope_threshold = Vector2(0.84, 0.98)
+low_slope_color = Color(0.366477, 0.373384, 0.0777902, 1)
+high_slope_color = Color(0.1, 0.05835, 0.049, 1)
+fog_color = Color(0.752941, 0.780392, 0.85098, 1)
+fog_density = 0.002
+fog_height_fade = 0.65
+fog_start = 100.0
+ambient_light = Color(0.14902, 0.14902, 0.14902, 1)
+light_color = Color(0.215776, 0.953787, 0.744189, 1)
+light_intensity = 0.75
+specular_strength = 0.2
+shininess = 8.0
+metadata/_custom_type_script = "uid://7n58awc2ols0"
+
+[sub_resource type="Compositor" id="Compositor_1i1cu"]
+compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_vvh5c"), null])
+
+[node name="Root" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.587785, 0.0338782, 0.808308, 8.73461e-08, -0.999123, 0.0418757, 0.809017, -0.0246138, -0.587269, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.60854)
+script = ExtResource("1_pp484")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_7owt0")
+compositor = SubResource("Compositor_1i1cu")
