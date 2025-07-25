@@ -1,5 +1,35 @@
 // perlin_noise2D
 
+// Improved Random Functions
+
+// Integer hash function from PCG
+uvec3 pcg3d(uvec3 p) {
+  p = p * 1664525u + 1013904223u;
+  p.x += p.y * p.z;
+  p.y += p.z * p.x;
+  p.z += p.x * p.y;
+  p ^= p >> 16u;
+  p += p >> 8u;
+  return p;
+}
+
+// Float version normalized to [0, 1)
+vec3 hash33(vec3 p) {
+  uvec3 n = floatBitsToUint(p);
+  return vec3(pcg3d(n)) / float(0xffffffffu);
+}
+
+// 2D to 3D position converter for hashing
+vec3 vec2_to_vec3(vec2 p) {
+  return vec3(p, _Seed); // _Seed = global uniform
+}
+
+// Convert hash to angle gradient
+vec2 angle_gradient(vec2 pos) {
+  float angle = hash33(vec2_to_vec3(pos)).x * 6.2831853; // 2 pi
+  return vec2(cos(angle), sin(angle));
+}
+
 // it's perlin noise that returns the noise in the x component and the
 // derivatives in the yz components as explained in my perlin noise video
 vec3 perlin_noise2D(vec2 pos) {
@@ -15,10 +45,10 @@ vec3 perlin_noise2D(vec2 pos) {
   vec2 c11 = latticeMax;
 
   // Gradient Vectors assigned to each corner
-  vec2 g00 = RandVector(HashPosition(c00));
-  vec2 g10 = RandVector(HashPosition(c10));
-  vec2 g01 = RandVector(HashPosition(c01));
-  vec2 g11 = RandVector(HashPosition(c11));
+  vec2 g00 = angle_gradient(c00);
+  vec2 g10 = angle_gradient(c10);
+  vec2 g01 = angle_gradient(c01);
+  vec2 g11 = angle_gradient(c11);
 
   // Directions to position from lattice corners
   vec2 p0 = remainder;
