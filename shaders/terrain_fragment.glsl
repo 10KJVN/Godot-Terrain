@@ -48,6 +48,8 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   float _Shininess;
 };
 
+layout(set = 0, binding = 1) uniform sampler2D u_texture;
+
 
 // These are the variables that we expect to receive from the vertex shader - Inputs
 layout(location = 2) in vec4 a_Color;
