@@ -54,7 +54,6 @@ layout(location = 2) in vec4 a_Color;
 layout(location = 3) in vec3 pos;
 layout(location = 4) in vec3 frag_world_pos;
 layout(location = 5) in vec3 view_dir;
-layout(location = 6) in vec2 uv_pass;
 
 // This is what the fragment shader will output, usually just a pixel color - Output
 layout(location = 0) out vec4 frag_color;

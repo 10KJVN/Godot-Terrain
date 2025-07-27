@@ -57,21 +57,18 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
 // line 198
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec4 a_Color;
-layout(location = 2) in vec2 in_uv;
 
 // This is what the vertex shader will output and send to the fragment shader.
 layout(location = 2) out vec4 v_Color;
 layout(location = 3) out vec3 pos;
 layout(location = 4) out vec3 frag_world_pos;
 layout(location = 5) out vec3 view_dir;
-layout(location = 6) out vec2 uv_pass;
 
 
 void main() {
   // Passes the vertex color over to the fragment shader, even though we don't
   // use it but you can use it if you want I guess
   v_Color = a_Color;
-  uv_pass = in_uv;
   frag_world_pos = (MODEL_MATRIX * vec4(a_Position, 1.0)).xyz;
   view_dir = normalize(camera_position - frag_world_pos);
 
