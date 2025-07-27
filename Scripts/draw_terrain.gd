@@ -550,6 +550,14 @@ func _notification(what):
 			rd.free_rid(p_wire_index_buffer)
 
 
+func get_image_uniform(image : RID, binding : int = 0) -> RDUniform:
+	var uniform : RDUniform = RDUniform.new()
+	uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_IMAGE
+	uniform.binding = binding
+	uniform.add_id(image)
+	return uniform
+
+
 func create_texture_from_file(path: String) -> RID:
 	var image := Image.new()
 	var err := image.load(path)
