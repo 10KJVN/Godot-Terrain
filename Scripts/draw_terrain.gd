@@ -579,3 +579,21 @@ func create_texture_from_file(path: String) -> RID:
 	var tex_view := rd.texture_create(tex_format, rd.TEXTURE_VIEW_2D, [image.get_data()])
 	
 	return tex_view
+
+
+func get_sampler_uniform(binding : int = 1) -> RDUniform:
+	var sampler := RDSamplerState.new()
+	sampler.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler.mipmap_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
+	sampler.repeat_u = rd.SAMPLER_REPEAT_MODE_REPEAT
+	sampler.repeat_v = rd.SAMPLER_REPEAT_MODE_REPEAT
+
+	var sampler_rid := rd.sampler_create(sampler)
+
+	var uniform := RDUniform.new()
+	uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER
+	uniform.binding = binding
+	uniform.add_id(sampler_rid)
+
+	return uniform
