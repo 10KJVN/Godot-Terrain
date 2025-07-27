@@ -165,7 +165,7 @@ func _init():
 	source_wire_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_wireframe.glsl")
 	
 	# 1. Load texture
-	create_texture_from_file("res://textures_ground.jpg")
+	create_texture_from_file("res://textures/ground.jpg")
 
 	# 2. Create sampler and store RID
 	create_texture_sampler()
@@ -593,7 +593,6 @@ func create_texture_sampler():
 	var sampler := RDSamplerState.new()
 	sampler.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
 	sampler.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler.mipmap_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
 	sampler.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
 	sampler.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
 	sampler.repeat_w = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
