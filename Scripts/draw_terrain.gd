@@ -134,6 +134,7 @@ var source_wire_fragment := _load_glsl("res://shaders/terrain_wireframe.glsl")
 
 var p_texture : RID
 var image_uniform : RDUniform
+var texture_uniform_set: RID
 
 
 func _test_shader_include():
@@ -597,3 +598,11 @@ func get_sampler_uniform(binding : int = 1) -> RDUniform:
 	uniform.add_id(sampler_rid)
 
 	return uniform
+
+
+func create_texture_uniform_set():
+	texture_uniform_set = rd.uniform_set_create(
+		[image_uniform],  # Array of RDUniforms
+		p_shader,         # Shader RID
+		0                 # set_index, must match `set = 0` in shader
+	)
