@@ -133,6 +133,7 @@ var source_fragment := _load_glsl("res://shaders/terrain_fragment.glsl")
 var source_wire_fragment := _load_glsl("res://shaders/terrain_wireframe.glsl")
 
 var p_texture : RID
+var p_texture_sampler : RID
 var image_uniform : RDUniform
 var texture_uniform_set: RID
 
@@ -525,6 +526,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		rd.draw_list_bind_index_array(draw_list, p_index_array)
 
 	rd.draw_list_bind_uniform_set(draw_list, p_render_pipeline_uniform_set, 0)
+	#rd.draw_list_bind_uniform_set(draw_list, texture_uniform_set, 0)
 	rd.draw_list_draw(draw_list, true, 1)
 	rd.draw_list_end()
 
@@ -582,27 +584,27 @@ func create_texture_from_file(path: String) -> RID:
 	return tex_view
 
 
-func get_sampler_uniform(binding : int = 1) -> RDUniform:
+func create_texture_sampler():
 	var sampler := RDSamplerState.new()
 	sampler.mag_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
 	sampler.min_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
 	sampler.mipmap_filter = RenderingDevice.SAMPLER_FILTER_LINEAR
-	sampler.repeat_u = rd.SAMPLER_REPEAT_MODE_REPEAT
-	sampler.repeat_v = rd.SAMPLER_REPEAT_MODE_REPEAT
+	sampler.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
+	sampler.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
+	sampler.repeat_w = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
 
-	var sampler_rid := rd.sampler_create(sampler)
-
-	var uniform := RDUniform.new()
-	uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER
-	uniform.binding = binding
-	uniform.add_id(sampler_rid)
-
-	return uniform
+	p_texture_sampler = rd.sampler_create(sampler)
 
 
 func create_texture_uniform_set():
+	var texture_uniform := RDUniform.new()
+	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	texture_uniform.binding = 1 # Important! Do not use 0!
+	texture_uniform.add_id(p_texture_sampler)
+	texture_uniform.add_id(p_texture)
+
 	texture_uniform_set = rd.uniform_set_create(
-		[image_uniform],  # Array of RDUniforms
+		[texture_uniform],  # Array of RDUniforms
 		p_shader,         # Shader RID
 		0                 # set_index, must match `set = 0` in shader
 	)
