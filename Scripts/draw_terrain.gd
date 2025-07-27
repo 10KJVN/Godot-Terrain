@@ -165,7 +165,7 @@ func _init():
 	source_wire_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_wireframe.glsl")
 	
 	# 1. Load texture
-	p_texture = create_texture_from_file("res://textures/ground.jpg")
+	create_texture_from_file("res://textures_ground.jpg")
 
 	# 2. Create sampler and store RID
 	create_texture_sampler()
@@ -569,27 +569,24 @@ func get_image_uniform(image : RID, binding : int = 0) -> RDUniform:
 	return uniform
 
 
-func create_texture_from_file(path: String) -> RID:
+func create_texture_from_file(path: String) -> void:
 	var image := Image.new()
 	var err := image.load(path)
 	if err != OK:
 		push_error("Failed to load image at %s" % path)
-		return RID()
+		return
 	
-	# Ensure image is in correct format
 	image.convert(Image.FORMAT_RGBA8)
 
-	# Create texture format description
 	var tex_format := RDTextureFormat.new()
 	tex_format.format = rd.DATA_FORMAT_R8G8B8A8_UNORM
 	tex_format.width = image.get_width()
 	tex_format.height = image.get_height()
-	tex_format.usage_bits = rd.TEXTURE_USAGE_SAMPLING_BIT | rd.TEXTURE_USAGE_CAN_COPY_FROM_BIT
-	
-	# Create texture via RenderingDevice
-	var tex_view := rd.texture_create(tex_format, rd.TEXTURE_VIEW_2D, [image.get_data()])
-	
-	return tex_view
+	tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_COPY_FROM_BIT
+
+	var tex_view := RDTextureView.new() # THIS is the key fix
+	p_texture = rd.texture_create(tex_format, tex_view, [image.get_data()])
+
 
 
 func create_texture_sampler():
