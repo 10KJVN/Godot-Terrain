@@ -132,6 +132,9 @@ var source_vertex := _load_glsl("res://shaders/terrain_vertex.glsl")
 var source_fragment := _load_glsl("res://shaders/terrain_fragment.glsl")
 var source_wire_fragment := _load_glsl("res://shaders/terrain_wireframe.glsl")
 
+var p_texture : RID
+var image_uniform : RDUniform
+
 
 func _test_shader_include():
 	var code := ShaderPreprocessor.preprocess_shader("res://shaders/includes/random.glsl")
@@ -545,3 +548,26 @@ func _notification(what):
 			rd.free_rid(p_wire_index_array)
 		if p_wire_index_buffer.is_valid():
 			rd.free_rid(p_wire_index_buffer)
+
+
+func create_texture_from_file(path: String) -> RID:
+	var image := Image.new()
+	var err := image.load(path)
+	if err != OK:
+		push_error("Failed to load image at %s" % path)
+		return RID()
+	
+	# Ensure image is in correct format
+	image.convert(Image.FORMAT_RGBA8)
+
+	# Create texture format description
+	var tex_format := RDTextureFormat.new()
+	tex_format.format = rd.DATA_FORMAT_R8G8B8A8_UNORM
+	tex_format.width = image.get_width()
+	tex_format.height = image.get_height()
+	tex_format.usage_bits = rd.TEXTURE_USAGE_SAMPLING_BIT | rd.TEXTURE_USAGE_CAN_COPY_FROM_BIT
+	
+	# Create texture via RenderingDevice
+	var tex_view := rd.texture_create(tex_format, rd.TEXTURE_VIEW_2D, [image.get_data()])
+	
+	return tex_view
