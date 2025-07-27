@@ -235,9 +235,6 @@ func initialize_render(framebuffer_format : int):
 
 			# Vertex color is not used but left as a demonstration for adding more vertex attributes
 			var color : Vector4 = Vector4(randf(), randf(), randf(), 1)
-			
-			# Generate UVs - planar mapping based on position
-			var uv : Vector2 = xz / float(side_length) # normalize to 0-1 range
 
 			# For some reason godot doesn't make it easy to append vectors to arrays
 			for i in 3: vertex_buffer.push_back(pos[i])
@@ -271,7 +268,7 @@ func initialize_render(framebuffer_format : int):
 	var vertex_buffers := [p_vertex_buffer, p_vertex_buffer]
 	
 	var sizeof_float := 4
-	var stride := 9
+	var stride := 7
 	
 	# The GPU needs to know the memory layout of the vertex data, in this case each vertex has a position (3 component vector) and a color (4 component vector)
 	var vertex_attrs = [RDVertexAttribute.new(), RDVertexAttribute.new()]
@@ -284,11 +281,6 @@ func initialize_render(framebuffer_format : int):
 	vertex_attrs[1].location = 1
 	vertex_attrs[1].offset = 3 * sizeof_float
 	vertex_attrs[1].stride = stride * sizeof_float
-	
-	vertex_attrs[2].format = rd.DATA_FORMAT_R32G32_SFLOAT
-	vertex_attrs[2].location = 2
-	vertex_attrs[2].offset = (3 + 4) * sizeof_float # 7 * 4 = 28 bytes
-	vertex_attrs[2].stride = stride * sizeof_float
 
 	vertex_format = rd.vertex_format_create(vertex_attrs)
 
