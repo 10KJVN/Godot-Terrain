@@ -163,7 +163,15 @@ func _init():
 	source_vertex = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_vertex.glsl")
 	source_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_fragment.glsl")
 	source_wire_fragment = ShaderPreprocessor.preprocess_shader("res://shaders/terrain_wireframe.glsl")
+	
+	# 1. Load texture
+	p_texture = create_texture_from_file("res://textures/ground.jpg")
 
+	# 2. Create sampler and store RID
+	create_texture_sampler()
+
+	# 3. Create uniform set for shader
+	create_texture_uniform_set()
 
 func _ready():
 	if not rd:
@@ -526,7 +534,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		rd.draw_list_bind_index_array(draw_list, p_index_array)
 
 	rd.draw_list_bind_uniform_set(draw_list, p_render_pipeline_uniform_set, 0)
-	#rd.draw_list_bind_uniform_set(draw_list, texture_uniform_set, 0)
+	rd.draw_list_bind_uniform_set(draw_list, texture_uniform_set, 0)
 	rd.draw_list_draw(draw_list, true, 1)
 	rd.draw_list_end()
 
@@ -594,7 +602,6 @@ func create_texture_sampler():
 	sampler.repeat_w = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
 
 	p_texture_sampler = rd.sampler_create(sampler)
-
 
 func create_texture_uniform_set():
 	var texture_uniform := RDUniform.new()
