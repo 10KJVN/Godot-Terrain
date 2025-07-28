@@ -170,9 +170,6 @@ func _init():
 	# 2. Create sampler and store RID
 	create_texture_sampler()
 
-	# 3. Create uniform set for shader
-	create_texture_uniform_set()
-
 func _ready():
 	if not rd:
 		rd = RenderingServer.get_rendering_device()
@@ -216,6 +213,9 @@ func initialize_render(framebuffer_format : int):
 		p_shader = new_shader
 	else:
 		push_error("Shader compilation failed, not replacing old shader")
+	
+	# 3. Create uniform set for shader
+	create_texture_uniform_set()
 
 	if new_wire_shader.is_valid():
 		if p_wire_shader.is_valid():
