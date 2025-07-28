@@ -77,7 +77,7 @@ void main() {
     // Slope + Material Color
     vec3 slope_normal = normalize(vec3(-n.y, 1, -n.z) * vec3(_SlopeDamping, 1, _SlopeDamping));
     float material_blend_factor = smoothstep(_SlopeRange.x, _SlopeRange.y, 1.0 - slope_normal.y);
-    vec4 albedo = mix(_LowSlopeColor, _HighSlopeColor, vec4(material_blend_factor));
+    vec4 base_albedo = mix(_LowSlopeColor, _HighSlopeColor, vec4(material_blend_factor));
 
     // LOD Factor
     float dist = length(frag_world_pos - camera_position);
@@ -87,8 +87,8 @@ void main() {
     // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
 
     // Lighting: Blinn-Phong
-    vec3 normal = normalize(vec3(-n.y, 1, -n.z));
-    vec3 lod_normal = normalize(mix(normal, vec3(0, 1, 0), lod_factor));
+    vec3 base_normal = normalize(vec3(-n.y, 1, -n.z)); // used for lighting
+    vec3 lod_normal = normalize(mix(base_normal, vec3(0, 1, 0), lod_factor));
     vec3 light_dir = normalize(_LightDirection);
     vec3 view_direction = normalize(view_dir);
 
@@ -107,7 +107,7 @@ void main() {
     vec4 ambient = albedo * _AmbientLight;
 
     // Combine lighting
-    vec4 lit = clamp(diffuse + specular_final + ambient, 0.0, 1.0);
+    vec4 lit = clamp(final_albedo); // Probably gotta move location for this.
     lit = pow(lit, vec4(2.2)); // gamma correction
 
     // Fog
@@ -133,7 +133,7 @@ void main() {
 	vec4 highSlopeTexSample = mix(highSlopeTexSample_x, highSlopeTexSample_z, highSlopeTex_blend);
 			
 	// Blend between the two terrain colors
-	vec4 albedo = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
+	vec4 final_albedo = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
 
     // Output
     //frag_color = mix(fog_color, lit, transmittance);
