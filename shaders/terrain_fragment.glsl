@@ -79,43 +79,6 @@ void main() {
     float material_blend_factor = smoothstep(_SlopeRange.x, _SlopeRange.y, 1.0 - slope_normal.y);
     vec4 base_albedo = mix(_LowSlopeColor, _HighSlopeColor, vec4(material_blend_factor));
 
-    // LOD Factor
-    float dist = length(frag_world_pos - camera_position);
-    float raw_dist = max(0.0, dist - fog_start);
-    float lod_factor = smoothstep(20.0, 80.0, raw_dist);
-    // TODO: Extend LOD to affect noise octaves or skip heavy effects.
-    // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
-
-    // Lighting: Blinn-Phong
-    vec3 base_normal = normalize(vec3(-n.y, 1, -n.z)); // used for lighting
-    vec3 lod_normal = normalize(mix(base_normal, vec3(0, 1, 0), lod_factor));
-    vec3 light_dir = normalize(_LightDirection);
-    vec3 view_direction = normalize(view_dir);
-
-    // Diffuse
-    float ndotl = clamp(dot(light_dir, lod_normal), 0.0, 1.0);
-    vec4 diffuse = albedo * ndotl;
-
-    // Specular
-    vec3 half_vector = normalize(light_dir + view_direction);
-    float spec_angle = clamp(dot(lod_normal, half_vector), 0.0, 1.0);
-    float spec_factor = pow(spec_angle, _Shininess);
-    vec3 specular = _LightColor * _LightIntensity * _SpecularStrength * spec_factor;
-    vec4 specular_final = vec4(specular, 0.0);
-
-    // Ambient
-    vec4 ambient = albedo * _AmbientLight;
-
-    // Combine lighting
-    vec4 lit = clamp(final_albedo); // Probably gotta move location for this.
-    lit = pow(lit, vec4(2.2)); // gamma correction
-
-    // Fog
-    float fog_dist = max(0.0, raw_dist - fog_start);
-    float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
-    float density = fog_density * height_factor;
-    float transmittance = exp(-fog_dist * density);
-
     // Texturing
 	// Horizontal
 	vec2 uv_y = 0.001 * pos.xz * _LowSlopeTexST.xy + _LowSlopeTexST.zw;
@@ -127,17 +90,56 @@ void main() {
 	vec4 highSlopeTexSample_x = texture(high_slope_texture, uv_x);
 	vec4 highSlopeTexSample_z = texture(high_slope_texture, uv_z);
 			
-	float nx = abs(normal.x);
-	float nz = abs(normal.z);
+	float nx = abs(slope_normal.x);
+	float nz = abs(slope_normal.z);
 	float highSlopeTex_blend = nz / (nx + nz);
 	vec4 highSlopeTexSample = mix(highSlopeTexSample_x, highSlopeTexSample_z, highSlopeTex_blend);
 			
 	// Blend between the two terrain colors
 	vec4 final_albedo = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
 
+
+    // LOD Factor
+    float dist = length(frag_world_pos - camera_position);
+    float raw_dist = max(0.0, dist - fog_start);
+    float lod_factor = smoothstep(20.0, 80.0, raw_dist);
+    // TODO: Extend LOD to affect noise octaves or skip heavy effects.
+    // e.g. reduce '_Octaves' or skip slope coloring/lighting if 'lod_factor' > 0.8
+
+
+    // Lighting: Blinn-Phong
+    vec3 base_normal = normalize(vec3(-n.y, 1, -n.z)); // used for lighting
+    vec3 lod_normal = normalize(mix(base_normal, vec3(0, 1, 0), lod_factor));
+    vec3 light_dir = normalize(_LightDirection);
+    vec3 view_direction = normalize(view_dir);
+
+    // Diffuse
+    float ndotl = clamp(dot(light_dir, lod_normal), 0.0, 1.0);
+    vec4 diffuse = final_albedo * ndotl;
+
+    // Specular
+    vec3 half_vector = normalize(light_dir + view_direction);
+    float spec_angle = clamp(dot(lod_normal, half_vector), 0.0, 1.0);
+    float spec_factor = pow(spec_angle, _Shininess);
+    vec3 specular = _LightColor * _LightIntensity * _SpecularStrength * spec_factor;
+    vec4 specular_final = vec4(specular, 0.0);
+
+    // Ambient
+    vec4 ambient = final_albedo * _AmbientLight;
+
+    // Combine lighting
+    vec4 lit = clamp(final_albedo, vec4(0.0), vec4(1.0)); // Probably gotta move location for this.
+    lit = pow(lit, vec4(2.2)); // gamma correction
+    
+    // Fog
+    float fog_dist = max(0.0, raw_dist - fog_start);
+    float height_factor = clamp(1.0 - fog_height_fade * (frag_world_pos.y / _TerrainHeight), 0.0, 1.0);
+    float density = fog_density * height_factor;
+    float transmittance = exp(-fog_dist * density);
+
+    
     // Output
-    //frag_color = mix(fog_color, lit, transmittance);
-    frag_color = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
+    frag_color = mix(fog_color, lit, transmittance);
 
     // DEBUG Outputs
     //frag_color = vec4(vec3(1.0 - lod_factor), 1.0); // LOD visualizer
@@ -147,6 +149,5 @@ void main() {
 
     //frag_color = vec4(specular, 1.0); // Specular intensity visualizer
     //frag_color = vec4(vec3(spec_factor), 1.0); //Specular factor
-    
     
 }
