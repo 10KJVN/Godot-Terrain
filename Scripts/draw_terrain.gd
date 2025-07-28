@@ -135,7 +135,8 @@ var source_wire_fragment := _load_glsl("res://shaders/terrain_wireframe.glsl")
 var p_texture : RID
 var p_texture_sampler : RID
 var image_uniform : RDUniform
-var texture_uniform_set: RID
+var main_uniform_set: RID
+var p_uniform_buffer : RID
 
 
 func _test_shader_include():
@@ -215,7 +216,7 @@ func initialize_render(framebuffer_format : int):
 		push_error("Shader compilation failed, not replacing old shader")
 	
 	# 3. Create uniform set for shader
-	create_texture_uniform_set()
+	create_main_uniform_set()
 
 	if new_wire_shader.is_valid():
 		if p_wire_shader.is_valid():
@@ -339,8 +340,8 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if not enabled: return
 	if _effect_callback_type != effect_callback_type: return
 	
-	if not p_texture.is_valid() or not p_texture_sampler.is_valid():
-		return # Wait until texture and sampler are ready
+	if not p_texture.is_valid() or not p_texture_sampler.is_valid or not p_uniform_buffer.is_valid():
+		return
 	
 	var render_scene_buffers : RenderSceneBuffersRD = render_data.get_render_scene_buffers()
 	var render_scene_data : RenderSceneData = render_data.get_render_scene_data()
@@ -501,31 +502,31 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 
 	# All of our settings are stored in a single uniform buffer, certainly not the best decision, but it's easy to work with
 	var buffer_bytes : PackedByteArray = PackedFloat32Array(buffer).to_byte_array()
-	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
+	p_uniform_buffer = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
 	
-	var uniforms = []
+	var uniforms := []
 
-	# Binding 0: Uniform buffer
-	var uniform_ubo := RDUniform.new()
-	uniform_ubo.binding = 0
-	uniform_ubo.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
-	uniform_ubo.add_id(p_uniform_buffer)
-	uniforms.push_back(uniform_ubo)
+	# Binding 0: Uniform buffer (e.g., fog, light, etc.)
+	var ubo := RDUniform.new()
+	ubo.binding = 0
+	ubo.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
+	ubo.add_id(p_uniform_buffer)
+	uniforms.append(ubo)
 
 	# Binding 1: Texture + Sampler
-	var uniform_sampler := RDUniform.new()
-	uniform_sampler.binding = 1
-	uniform_sampler.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	uniform_sampler.add_id(p_texture)
-	uniform_sampler.add_id(p_texture_sampler)
-	uniforms.push_back(uniform_sampler)
+	var tex := RDUniform.new()
+	tex.binding = 1
+	tex.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	tex.add_id(p_texture)
+	tex.add_id(p_texture_sampler)
+	uniforms.append(tex)
 
-	# Free previous uniform set if needed
+	# Create the uniform set
 	if p_render_pipeline_uniform_set.is_valid():
 		rd.free_rid(p_render_pipeline_uniform_set)
 
-	# Create new one
 	p_render_pipeline_uniform_set = rd.uniform_set_create(uniforms, p_shader, 0)
+
 
 	# If you frame capture the program with something like NVIDIA NSight you will see this label show up so you can easily see the render time of the terrain
 	rd.draw_command_begin_label("Terrain Mesh", Color(1.0, 1.0, 1.0, 1.0))
@@ -546,7 +547,7 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		rd.draw_list_bind_index_array(draw_list, p_index_array)
 
 	rd.draw_list_bind_uniform_set(draw_list, p_render_pipeline_uniform_set, 0)
-	rd.draw_list_bind_uniform_set(draw_list, texture_uniform_set, 0)
+	rd.draw_list_bind_uniform_set(draw_list, main_uniform_set, 0)
 	rd.draw_list_draw(draw_list, true, 1)
 	rd.draw_list_end()
 
@@ -611,15 +612,20 @@ func create_texture_sampler():
 
 	p_texture_sampler = rd.sampler_create(sampler)
 
-func create_texture_uniform_set():
+func create_main_uniform_set():
+	var ubo_uniform := RDUniform.new()
+	ubo_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
+	ubo_uniform.binding = 0
+	ubo_uniform.add_id(p_uniform_buffer)
+
 	var texture_uniform := RDUniform.new()
 	texture_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
-	texture_uniform.binding = 1 # Important! Do not use 0!
+	texture_uniform.binding = 1
 	texture_uniform.add_id(p_texture_sampler)
 	texture_uniform.add_id(p_texture)
 
-	texture_uniform_set = rd.uniform_set_create(
-		[texture_uniform],  # Array of RDUniforms
-		p_shader,         # Shader RID
-		0                 # set_index, must match `set = 0` in shader
+	main_uniform_set = rd.uniform_set_create(
+		[ubo_uniform, texture_uniform],
+		p_shader,
+		0  # set = 0
 	)
