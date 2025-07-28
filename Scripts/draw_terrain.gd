@@ -501,13 +501,21 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	var p_uniform_buffer : RID = rd.uniform_buffer_create(buffer_bytes.size(), buffer_bytes)
 	
 	var uniforms = []
-	var uniform := RDUniform.new()
-	
-	# The gpu needs to know the layout of the uniform variables, even though we have many variables here on the cpu, they're all in one uniform buffer, and so there is technically only one shader uniform
-	uniform.binding = 0
-	uniform.uniform_type = rd.UNIFORM_TYPE_UNIFORM_BUFFER
-	uniform.add_id(p_uniform_buffer)
-	uniforms.push_back(uniform)
+
+	# Binding 0: Uniform buffer
+	var uniform_ubo := RDUniform.new()
+	uniform_ubo.binding = 0
+	uniform_ubo.uniform_type = rd.UNIFORM_TYPE_UNIFORM_BUFFER
+	uniform_ubo.add_id(p_uniform_buffer)
+	uniforms.push_back(uniform_ubo)
+
+	# Binding 1: Texture sampler
+	var uniform_sampler := RDUniform.new()
+	uniform_sampler.binding = 1
+	uniform_sampler.uniform_type = rd.UNIFORM_TYPE_SAMPLER
+	uniform_sampler.add_id(p_texture) # assuming this is already loaded elsewhere
+	uniform_sampler.set_sampler(p_texture_sampler)
+	uniforms.push_back(uniform_sampler)
 	
 	# Currently we just free the previously instantiated uniform set and then make a new one, ideally this is only done when the uniform variables change
 	if p_render_pipeline_uniform_set.is_valid():
