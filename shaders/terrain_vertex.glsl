@@ -9,7 +9,10 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   mat4 MODEL_MATRIX;  // 16
 
   vec4 _LowSlopeColor;
+  vec4 _LowSlopeTexST;
   vec4 _HighSlopeColor;
+  vec4 _HighSlopeTexST;
+
   vec4 _AmbientLight;
   vec4 fog_color;  // 4
 
@@ -46,7 +49,6 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   float _LightIntensity;
   float _SpecularStrength;
   float _Shininess;
-  
 };
 
 #include "random.glsl"

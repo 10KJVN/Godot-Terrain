@@ -9,7 +9,10 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   mat4 MODEL_MATRIX;  // 16
 
   vec4 _LowSlopeColor;
+  vec4 _LowSlopeTexST;
   vec4 _HighSlopeColor;
+  vec4 _HighSlopeTexST;
+
   vec4 _AmbientLight;
   vec4 fog_color;  // 4
 
@@ -48,6 +51,9 @@ layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   float _Shininess;
 };
 
+// Texturing
+layout(set = 0, binding = 1) uniform sampler2D low_slope_texture;
+layout(set = 0, binding = 2) uniform sampler2D high_slope_texture;
 
 // These are the variables that we expect to receive from the vertex shader - Inputs
 layout(location = 2) in vec4 a_Color;
@@ -110,8 +116,28 @@ void main() {
     float density = fog_density * height_factor;
     float transmittance = exp(-fog_dist * density);
 
+    // Texturing
+	// Horizontal
+	vec2 uv_y = 0.001 * pos.xz * _LowSlopeTexST.xy + _LowSlopeTexST.zw;
+	// Vertical
+	vec2 uv_x = -0.001 * pos.zy * _HighSlopeTexST.xy + _HighSlopeTexST.zw;
+	vec2 uv_z = -0.001 * pos.xy * _HighSlopeTexST.xy + _HighSlopeTexST.zw;
+			
+	vec4 lowSlopeTexSample = texture(low_slope_texture, uv_y);
+	vec4 highSlopeTexSample_x = texture(high_slope_texture, uv_x);
+	vec4 highSlopeTexSample_z = texture(high_slope_texture, uv_z);
+			
+	float nx = abs(normal.x);
+	float nz = abs(normal.z);
+	float highSlopeTex_blend = nz / (nx + nz);
+	vec4 highSlopeTexSample = mix(highSlopeTexSample_x, highSlopeTexSample_z, highSlopeTex_blend);
+			
+	// Blend between the two terrain colors
+	vec4 albedo = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
+
     // Output
-    frag_color = mix(fog_color, lit, transmittance);
+    //frag_color = mix(fog_color, lit, transmittance);
+    frag_color = mix(lowSlopeTexSample * _LowSlopeColor, highSlopeTexSample * _HighSlopeColor, vec4(material_blend_factor));
 
     // DEBUG Outputs
     //frag_color = vec4(vec3(1.0 - lod_factor), 1.0); // LOD visualizer
