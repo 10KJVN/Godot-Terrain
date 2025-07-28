@@ -339,6 +339,9 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if not enabled: return
 	if _effect_callback_type != effect_callback_type: return
 	
+	if not p_texture.is_valid() or not p_texture_sampler.is_valid():
+		return # Wait until texture and sampler are ready
+	
 	var render_scene_buffers : RenderSceneBuffersRD = render_data.get_render_scene_buffers()
 	var render_scene_data : RenderSceneData = render_data.get_render_scene_data()
 	
@@ -505,22 +508,23 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	# Binding 0: Uniform buffer
 	var uniform_ubo := RDUniform.new()
 	uniform_ubo.binding = 0
-	uniform_ubo.uniform_type = rd.UNIFORM_TYPE_UNIFORM_BUFFER
+	uniform_ubo.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
 	uniform_ubo.add_id(p_uniform_buffer)
 	uniforms.push_back(uniform_ubo)
 
-	# Binding 1: Texture sampler
+	# Binding 1: Texture + Sampler
 	var uniform_sampler := RDUniform.new()
 	uniform_sampler.binding = 1
-	uniform_sampler.uniform_type = rd.UNIFORM_TYPE_SAMPLER
-	uniform_sampler.add_id(p_texture) # assuming this is already loaded elsewhere
-	uniform_sampler.set_sampler(p_texture_sampler)
+	uniform_sampler.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	uniform_sampler.add_id(p_texture)
+	uniform_sampler.add_id(p_texture_sampler)
 	uniforms.push_back(uniform_sampler)
-	
-	# Currently we just free the previously instantiated uniform set and then make a new one, ideally this is only done when the uniform variables change
+
+	# Free previous uniform set if needed
 	if p_render_pipeline_uniform_set.is_valid():
 		rd.free_rid(p_render_pipeline_uniform_set)
-	
+
+	# Create new one
 	p_render_pipeline_uniform_set = rd.uniform_set_create(uniforms, p_shader, 0)
 
 	# If you frame capture the program with something like NVIDIA NSight you will see this label show up so you can easily see the render time of the terrain
