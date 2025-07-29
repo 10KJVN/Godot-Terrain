@@ -193,7 +193,7 @@ func _init():
 func _ready():
 	if not rd:
 		rd = RenderingServer.get_rendering_device()
-		
+	
 	initialize_render(0)
 
 
@@ -581,6 +581,14 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	# Currently we just free the previously instantiated uniform set and then make a new one, ideally this is only done when the uniform variables change
 	if p_render_pipeline_uniform_set.is_valid():
 		rd.free_rid(p_render_pipeline_uniform_set)
+	
+	print("low_slope_texture:", low_slope_texture)
+	print("low_slope_rdtex:", low_slope_rdtex)
+	print("low_slope_rdtex.is_valid():", low_slope_rdtex.is_valid())
+
+	print("high_slope_texture:", high_slope_texture)
+	print("high_slope_rdtex:", high_slope_rdtex)
+	print("high_slope_rdtex.is_valid():", high_slope_rdtex.is_valid())
 	
 	p_render_pipeline_uniform_set = rd.uniform_set_create(uniforms, p_shader, 0)
 
