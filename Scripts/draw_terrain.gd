@@ -134,6 +134,7 @@ var p_wire_shader : RID
 var clear_colors := PackedColorArray([Color.DARK_BLUE])
 var low_slope_rdtex : RID
 var high_slope_rdtex : RID
+var slope_tex_size: Vector2i = Vector2i(1024, 1024)
 
 var low_slope_texture_copied_to_gpu : RID
 var high_slope_texture_copied_to_gpu : RID
@@ -163,8 +164,8 @@ func init_gpu():
 	# Data will be copied to these textures in _render_callback
 	var slope_tex_format = RDTextureFormat.new()
 	slope_tex_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
-	slope_tex_format.width = 1024
-	slope_tex_format.height = 1024
+	slope_tex_format.width = slope_tex_size.x
+	slope_tex_format.height = slope_tex_size.y
 	slope_tex_format.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
 	slope_tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
 
@@ -570,12 +571,14 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if low_slope_texture_copied_to_gpu != low_slope_texture.get_rid() and low_slope_rdtex.is_valid():
 		var image = low_slope_texture.get_image()
 		image.convert(Image.FORMAT_RGBA8)
+		image.resize(slope_tex_size.x, slope_tex_size.y, Image.INTERPOLATE_BILINEAR)
 		rd.texture_update(low_slope_rdtex, 0, image.get_data())
 		low_slope_texture_copied_to_gpu = low_slope_texture.get_rid()
-
+	# TODO: Fix does "not match data supplied size" error in editor
 	if high_slope_texture_copied_to_gpu != high_slope_texture.get_rid() and high_slope_rdtex.is_valid():
 		var image = high_slope_texture.get_image()
 		image.convert(Image.FORMAT_RGBA8)
+		image.resize(slope_tex_size.x, slope_tex_size.y, Image.INTERPOLATE_BILINEAR)
 		rd.texture_update(high_slope_rdtex, 0, image.get_data())
 		high_slope_texture_copied_to_gpu = high_slope_texture.get_rid()
 	
