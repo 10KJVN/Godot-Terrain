@@ -2,32 +2,45 @@
 
 layout(set = 0, binding = 0, std140) uniform UniformBufferObject {
   mat4 MVP;
-  mat4 MODEL_MATRIX;
+  mat4 MODEL_MATRIX;  // 16
+
   vec4 _LowSlopeColor;
+  vec4 _LowSlopeTexST;
   vec4 _HighSlopeColor;
+  vec4 _HighSlopeTexST;
+
   vec4 _AmbientLight;
-  vec4 fog_color;
+  vec4 fog_color;  // 4
+
   vec3 _LightDirection;
   float _GradientRotation;
+
   vec3 _Offset;
   float _NoiseRotation;
+
   vec3 camera_position;
-  float _TerrainHeight;
+  float _TerrainHeight;  // 3 + 1
+
   vec2 _AngularVariance;
-  vec2 _SlopeRange;
+  vec2 _SlopeRange;  // 2 + 2
+
   float _Scale;
   float _Octaves;
   float _AmplitudeDecay;
   float _NormalStrength;
+
   float _Seed;
   float _InitialAmplitude;
   float _Lacunarity;
   float _SlopeDamping;
+
   float _FrequencyVarianceLowerBound;
   float _FrequencyVarianceUpperBound;
+
   float fog_start;
   float fog_density;
   float fog_height_fade;
+
   vec3 _LightColor;
   float _LightIntensity;
   float _SpecularStrength;

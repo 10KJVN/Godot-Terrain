@@ -65,9 +65,15 @@ class_name DrawTerrainMesh extends CompositorEffect
 @export var slope_threshold : Vector2 = Vector2(0.9, 0.98)
 
 ## Color of flatter areas of terrain
+@export var low_slope_texture : Texture2D
+@export var low_slope_texture_ST : Vector4 # ST means scale (xy) translation (zw)
+
 @export var low_slope_color : Color = Color(0.83, 0.88, 0.94)
 
 ## Color of steeper areas of terrain
+@export var high_slope_texture : Texture2D
+@export var high_slope_texture_ST : Vector4
+
 @export var high_slope_color : Color = Color(0.16, 0.1, 0.1)
 
 @export_group("Fog Settings")
@@ -126,6 +132,12 @@ var p_wire_index_array : RID
 var p_shader : RID
 var p_wire_shader : RID
 var clear_colors := PackedColorArray([Color.DARK_BLUE])
+var low_slope_rdtex : RID
+var high_slope_rdtex : RID
+var slope_tex_size: Vector2i = Vector2i(1024, 1024)
+
+var low_slope_texture_copied_to_gpu : RID
+var high_slope_texture_copied_to_gpu : RID
 
 const ShaderPreprocessor = preload("res://Scripts/shader_preprocessor.gd")
 var source_vertex := _load_glsl("res://shaders/terrain_vertex.glsl")
@@ -144,10 +156,30 @@ func _load_glsl(path: String) -> String:
 	push_error("Could not read GLSL file: " + path)
 	return ""
 
+func init_gpu():
+
+	rd = RenderingServer.get_rendering_device()
+
+	# Creating 2 textures on the gpu for the flat / steep areas
+	# Data will be copied to these textures in _render_callback
+	var slope_tex_format = RDTextureFormat.new()
+	slope_tex_format.texture_type = RenderingDevice.TEXTURE_TYPE_2D
+	slope_tex_format.width = slope_tex_size.x
+	slope_tex_format.height = slope_tex_size.y
+	slope_tex_format.format = RenderingDevice.DATA_FORMAT_R8G8B8A8_UNORM
+	slope_tex_format.usage_bits = RenderingDevice.TEXTURE_USAGE_STORAGE_BIT | RenderingDevice.TEXTURE_USAGE_SAMPLING_BIT | RenderingDevice.TEXTURE_USAGE_CAN_UPDATE_BIT
+
+	# Low slope
+	low_slope_rdtex = rd.texture_create(slope_tex_format, RDTextureView.new())
+
+	# High slope
+	high_slope_rdtex = rd.texture_create(slope_tex_format, RDTextureView.new())
+
 func _init():
 	effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 	
-	rd = RenderingServer.get_rendering_device()
+	if rd == null:
+		init_gpu()
 
 	# Gets whatever light source is in the scene, compositor effects are resources not nodes and so we need to do some jank stuff to get access to the node scene tree
 	var tree := Engine.get_main_loop() as SceneTree
@@ -161,9 +193,9 @@ func _init():
 
 
 func _ready():
-	if not rd:
-		rd = RenderingServer.get_rendering_device()
-		
+	if rd == null:
+		init_gpu()
+	
 	initialize_render(0)
 
 
@@ -326,6 +358,9 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if not enabled: return
 	if _effect_callback_type != effect_callback_type: return
 	
+	if rd == null:
+		init_gpu()
+	
 	var render_scene_buffers : RenderSceneBuffersRD = render_data.get_render_scene_buffers()
 	var render_scene_data : RenderSceneData = render_data.get_render_scene_data()
 	
@@ -401,11 +436,21 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	buffer.push_back(low_slope_color.b)
 	buffer.push_back(low_slope_color.a)
 
+	buffer.push_back(low_slope_texture_ST.x)
+	buffer.push_back(low_slope_texture_ST.y)
+	buffer.push_back(low_slope_texture_ST.z)
+	buffer.push_back(low_slope_texture_ST.w)
+
 	# _HighSlopeColor (vec4)
 	buffer.push_back(high_slope_color.r)
 	buffer.push_back(high_slope_color.g)
 	buffer.push_back(high_slope_color.b)
 	buffer.push_back(high_slope_color.a)
+	
+	buffer.push_back(high_slope_texture_ST.x)
+	buffer.push_back(high_slope_texture_ST.y)
+	buffer.push_back(high_slope_texture_ST.z)
+	buffer.push_back(high_slope_texture_ST.w)
 
 	# _AmbientLight (vec4)
 	buffer.push_back(ambient_light.r)
@@ -496,9 +541,58 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	uniform.add_id(p_uniform_buffer)
 	uniforms.push_back(uniform)
 	
+	# Texturing
+	if not low_slope_texture or not high_slope_texture:
+		push_error("Unassigned textures")
+		return
+
+	# Sampler object for both textures
+	var slope_tex_sampler_state := RDSamplerState.new()
+	slope_tex_sampler_state.repeat_u = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
+	slope_tex_sampler_state.repeat_v = RenderingDevice.SAMPLER_REPEAT_MODE_REPEAT
+	var slope_tex_sampler = rd.sampler_create(slope_tex_sampler_state)
+
+	# Binding the textures created on the gpu in init_gpu() to the shader
+	var low_slope_tex_uniform := RDUniform.new()
+	low_slope_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	low_slope_tex_uniform.binding = 1
+	low_slope_tex_uniform.add_id(slope_tex_sampler)
+	low_slope_tex_uniform.add_id(low_slope_rdtex)
+	uniforms.push_back(low_slope_tex_uniform)
+
+	var high_slope_tex_uniform := RDUniform.new()
+	high_slope_tex_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_SAMPLER_WITH_TEXTURE
+	high_slope_tex_uniform.binding = 2
+	high_slope_tex_uniform.add_id(slope_tex_sampler)
+	high_slope_tex_uniform.add_id(high_slope_rdtex)
+	uniforms.push_back(high_slope_tex_uniform)
+
+	# Updating texture data when a change is made in the editor
+	if low_slope_texture_copied_to_gpu != low_slope_texture.get_rid() and low_slope_rdtex.is_valid():
+		var image = low_slope_texture.get_image()
+		image.convert(Image.FORMAT_RGBA8)
+		image.resize(slope_tex_size.x, slope_tex_size.y, Image.INTERPOLATE_BILINEAR)
+		rd.texture_update(low_slope_rdtex, 0, image.get_data())
+		low_slope_texture_copied_to_gpu = low_slope_texture.get_rid()
+	# TODO: Fix does "not match data supplied size" error in editor
+	if high_slope_texture_copied_to_gpu != high_slope_texture.get_rid() and high_slope_rdtex.is_valid():
+		var image = high_slope_texture.get_image()
+		image.convert(Image.FORMAT_RGBA8)
+		image.resize(slope_tex_size.x, slope_tex_size.y, Image.INTERPOLATE_BILINEAR)
+		rd.texture_update(high_slope_rdtex, 0, image.get_data())
+		high_slope_texture_copied_to_gpu = high_slope_texture.get_rid()
+	
 	# Currently we just free the previously instantiated uniform set and then make a new one, ideally this is only done when the uniform variables change
 	if p_render_pipeline_uniform_set.is_valid():
 		rd.free_rid(p_render_pipeline_uniform_set)
+	
+	#print("low_slope_texture:", low_slope_texture)
+	#print("low_slope_rdtex:", low_slope_rdtex)
+	#print("low_slope_rdtex.is_valid():", low_slope_rdtex.is_valid())
+#
+	#print("high_slope_texture:", high_slope_texture)
+	#print("high_slope_rdtex:", high_slope_rdtex)
+	#print("high_slope_rdtex.is_valid():", high_slope_rdtex.is_valid())
 	
 	p_render_pipeline_uniform_set = rd.uniform_set_create(uniforms, p_shader, 0)
 

@@ -1,7 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://etlrqir3d7md"]
+[gd_scene load_steps=8 format=3 uid="uid://etlrqir3d7md"]
 
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_pp484"]
+[ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/ice-and-snow-ground-1024x1024.jpg" id="2_gm827"]
 [ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="2_lr1yk"]
+[ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/0038-ground-texture-seamless.jpg" id="2_ls6rb"]
 
 [sub_resource type="Environment" id="Environment_7owt0"]
 background_mode = 1
@@ -38,7 +40,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("2_lr1yk")
 regenerate = false
-camera_position = Vector3(22.0838, 35.3389, -146.534)
+camera_position = Vector3(-25.8224, 22.3635, 83.5895)
 side_length = 512
 mesh_scale = 1.0
 wireframe = false
@@ -56,7 +58,11 @@ frequency_variance = Vector2(-0.085, 0.115)
 height_scale = 90.9
 slope_damping = 0.155
 slope_threshold = Vector2(0.84, 0.98)
+low_slope_texture = ExtResource("2_ls6rb")
+low_slope_texture_ST = Vector4(1, 1, 1, 1)
 low_slope_color = Color(0.366477, 0.373384, 0.0777902, 1)
+high_slope_texture = ExtResource("2_gm827")
+high_slope_texture_ST = Vector4(1, 1, 1, 1)
 high_slope_color = Color(0.1, 0.05835, 0.049, 1)
 fog_color = Color(0.752941, 0.780392, 0.85098, 1)
 fog_density = 0.002
