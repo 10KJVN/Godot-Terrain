@@ -177,7 +177,8 @@ func init_gpu():
 func _init():
 	effect_callback_type = CompositorEffect.EFFECT_CALLBACK_TYPE_POST_TRANSPARENT
 	
-	rd = RenderingServer.get_rendering_device()
+	if rd == null:
+		init_gpu()
 
 	# Gets whatever light source is in the scene, compositor effects are resources not nodes and so we need to do some jank stuff to get access to the node scene tree
 	var tree := Engine.get_main_loop() as SceneTree
@@ -191,8 +192,8 @@ func _init():
 
 
 func _ready():
-	if not rd:
-		rd = RenderingServer.get_rendering_device()
+	if rd == null:
+		init_gpu()
 	
 	initialize_render(0)
 
@@ -582,13 +583,13 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 	if p_render_pipeline_uniform_set.is_valid():
 		rd.free_rid(p_render_pipeline_uniform_set)
 	
-	print("low_slope_texture:", low_slope_texture)
-	print("low_slope_rdtex:", low_slope_rdtex)
-	print("low_slope_rdtex.is_valid():", low_slope_rdtex.is_valid())
-
-	print("high_slope_texture:", high_slope_texture)
-	print("high_slope_rdtex:", high_slope_rdtex)
-	print("high_slope_rdtex.is_valid():", high_slope_rdtex.is_valid())
+	#print("low_slope_texture:", low_slope_texture)
+	#print("low_slope_rdtex:", low_slope_rdtex)
+	#print("low_slope_rdtex.is_valid():", low_slope_rdtex.is_valid())
+#
+	#print("high_slope_texture:", high_slope_texture)
+	#print("high_slope_rdtex:", high_slope_rdtex)
+	#print("high_slope_rdtex.is_valid():", high_slope_rdtex.is_valid())
 	
 	p_render_pipeline_uniform_set = rd.uniform_set_create(uniforms, p_shader, 0)
 
