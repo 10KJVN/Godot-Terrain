@@ -1,11 +1,12 @@
 shader_type spatial;
+render_mode depth_draw_always;
 
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 uniform vec3 water_color : source_color = vec3(0.0, 0.2, 0.5);
 uniform float wave_speed = 0.5;
 uniform float wave_height = 0.1;
 
-// Sky3D connection with proper time handling
+// Sky3D sync
 uniform vec3 sun_direction = vec3(0.0, 1.0, 0.0);
 uniform vec3 sun_color = vec3(1.0);
 uniform float sun_energy = 1.0;
@@ -52,6 +53,9 @@ void fragment() {
     
     // Material properties
     METALLIC = mix(0.1, 0.3, day_intensity);
+	//METALLIC = 0.3;
     ROUGHNESS = mix(0.15, 0.1, day_intensity); // Smoother during day
+	//ROUGHNESS = 0.1;
     SPECULAR = mix(0.3, 0.5, day_intensity);
+	//SPECULAR = 0.5;
 }
