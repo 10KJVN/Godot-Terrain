@@ -5,3 +5,13 @@
 [resource]
 render_priority = 0
 shader = ExtResource("1_eplgm")
+shader_parameter/water_color = Color(0, 0.2, 0.5, 1)
+shader_parameter/wave_speed = 2.5
+shader_parameter/wave_height = 0.515
+shader_parameter/sun_direction = Vector3(-0.00749758, -0.844004, -0.536285)
+shader_parameter/sun_color = Vector3(1, 1, 1)
+shader_parameter/sun_energy = 1.0
+shader_parameter/ambient_light = Vector3(0.2, 0.2, 0.2)
+shader_parameter/time_of_day = 0.5
+shader_parameter/moon_direction = Vector3(-0.284925, -0.82901, -0.481208)
+shader_parameter/moon_color = Vector3(0.8, 0.85, 1)
