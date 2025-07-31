@@ -44,7 +44,7 @@ shader_parameter/Main_Saturation = 1.2
 shader_parameter/Posterization = 0.2
 shader_parameter/Vignette = 0.2
 shader_parameter/Noise = ExtResource("3_0tf3h")
-shader_parameter/Film_Grain = 1.65
+shader_parameter/Film_Grain = 1.4
 shader_parameter/Filter_Strenght = 0.0
 
 [sub_resource type="Environment" id="Environment_7owt0"]
