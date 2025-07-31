@@ -1,6 +1,6 @@
 [gd_resource type="VisualShader" load_steps=35 format=3 uid="uid://dbapk0dtj85oy"]
 
-[ext_resource type="Texture2D" uid="uid://dlkx6u51rb5cn" path="res://Textures/Gradient.tres" id="1_qx321"]
+[ext_resource type="Texture2D" uid="uid://djbqyeb5twhqq" path="res://Textures/Gradient.tres" id="1_qx321"]
 
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_27r52"]
 linked_parent_graph_frame = 3
@@ -59,7 +59,7 @@ max = 100.0
 default_value_enabled = true
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_0aqq5"]
-size = Vector2(1289, 888)
+size = Vector2(1204, 728)
 title = "Brightness, Contrast, Saturation"
 attached_nodes = PackedInt32Array(15, 16, 14, 9, 8, 7, 6)
 
@@ -116,7 +116,7 @@ linked_parent_graph_frame = 4
 operator = 3
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_uafdx"]
-size = Vector2(1089, 748)
+size = Vector2(1005, 620)
 title = "Vignette"
 attached_nodes = PackedInt32Array(10, 11, 13, 12, 254)
 
@@ -136,12 +136,12 @@ default_value_enabled = true
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_l1o88"]
 linked_parent_graph_frame = 151
-size = Vector2(2149, 1088)
+size = Vector2(2064, 992)
 title = "Main Color Correcton"
 attached_nodes = PackedInt32Array(25, 20, 27, 22, 21, 30, 29, 28, 26, 24, 23, 19, 18)
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_qepnh"]
-size = Vector2(749, 409)
+size = Vector2(664, 298)
 title = "Color Filter"
 attached_nodes = PackedInt32Array(31, 32)
 
@@ -175,13 +175,13 @@ code = "shader_type canvas_item;
 render_mode blend_mix;
 
 uniform sampler2D screen_tex_frg_253 : hint_screen_texture;
-uniform float Main_Color_Temp : hint_range(1000, 8000, 0.5) = 4500;
-uniform float Main_Green_Tint : hint_range(-100, 100, 0.10000000149012) = 0;
-uniform float Main_Brightness : hint_range(0, 2, 0.10000000149012) = 1;
-uniform float Main_Contrast : hint_range(0.10000000149012, 2, 0.10000000149012) = 1;
-uniform float Main_Saturation : hint_range(0, 2, 0.10000000149012) = 1;
+uniform float Main_Color_Temp : hint_range(1000.0, 8000.0, 0.5) = 4500.0;
+uniform float Main_Green_Tint : hint_range(-100.0, 100.0, 0.10000000149012) = 0.0;
+uniform float Main_Brightness : hint_range(0.0, 2.0, 0.10000000149012) = 1.0;
+uniform float Main_Contrast : hint_range(0.10000000149012, 2.0, 0.10000000149012) = 1.0;
+uniform float Main_Saturation : hint_range(0.0, 2.0, 0.10000000149012) = 1.0;
 uniform sampler2D tex_frg_10;
-uniform float Vignette : hint_range(0, 2, 0.00999999977648) = 0;
+uniform float Vignette : hint_range(0.0, 2.0, 0.00999999977648) = 0.0;
 uniform vec4 Color_Filter : source_color = vec4(1.000000, 1.000000, 1.000000, 1.000000);
 
 
@@ -324,7 +324,7 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-826.047, -169.429)
+graph_offset = Vector2(-3775.4, -275.663)
 mode = 1
 flags/light_only = false
 nodes/fragment/0/position = Vector2(0, 0)
