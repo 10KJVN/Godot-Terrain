@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://etlrqir3d7md"]
+[gd_scene load_steps=14 format=3 uid="uid://etlrqir3d7md"]
 
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_pp484"]
 [ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/ice-and-snow-ground-1024x1024.jpg" id="2_gm827"]
@@ -6,6 +6,9 @@
 [ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="2_lr1yk"]
 [ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/0038-ground-texture-seamless.jpg" id="2_ls6rb"]
 [ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_0tf3h"]
+[ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_0naof"]
+[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="7_l0x56"]
+[ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="8_0naof"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l0x56"]
 shader = ExtResource("2_hixww")
@@ -47,32 +50,6 @@ shader_parameter/Noise = ExtResource("3_0tf3h")
 shader_parameter/Film_Grain = 1.4
 shader_parameter/Filter_Strenght = 0.0
 
-[sub_resource type="Environment" id="Environment_7owt0"]
-background_mode = 1
-background_color = Color(0.239216, 0.239216, 0.239216, 1)
-tonemap_mode = 2
-tonemap_exposure = 1.2
-tonemap_white = 2.0
-glow_enabled = true
-glow_levels/1 = 1.2
-glow_levels/2 = 10.05
-glow_levels/3 = 7.2
-glow_levels/4 = 19.7
-glow_levels/5 = 6.05
-glow_levels/6 = 2.95
-glow_levels/7 = 4.25
-glow_normalized = true
-glow_intensity = 1.75
-glow_strength = 1.65
-glow_bloom = 0.07
-glow_blend_mode = 0
-glow_hdr_threshold = 0.7
-fog_enabled = true
-fog_light_color = Color(0.717647, 0.423529, 0.717647, 1)
-adjustment_enabled = true
-adjustment_contrast = 1.1
-adjustment_saturation = 1.8
-
 [sub_resource type="CompositorEffect" id="CompositorEffect_vvh5c"]
 resource_local_to_scene = false
 resource_name = ""
@@ -82,7 +59,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("2_lr1yk")
 regenerate = false
-camera_position = Vector3(0, 0, 2.60854)
+camera_position = Vector3(-46.519, -0.761333, 31.8062)
 side_length = 512
 mesh_scale = 1.0
 wireframe = false
@@ -120,6 +97,12 @@ metadata/_custom_type_script = "uid://7n58awc2ols0"
 [sub_resource type="Compositor" id="Compositor_1i1cu"]
 compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_vvh5c"), null])
 
+[sub_resource type="QuadMesh" id="QuadMesh_q0gje"]
+lightmap_size_hint = Vector2i(52, 52)
+material = ExtResource("7_l0x56")
+size = Vector2(1000, 1000)
+orientation = 1
+
 [node name="Root" type="Node3D"]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
@@ -141,5 +124,12 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_7owt0")
+environment = ExtResource("4_0naof")
 compositor = SubResource("Compositor_1i1cu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 0.257, -27.775, -0.046)
+gi_mode = 2
+mesh = SubResource("QuadMesh_q0gje")
+script = ExtResource("8_0naof")
+sky_3d_node = NodePath("../Sky3D")

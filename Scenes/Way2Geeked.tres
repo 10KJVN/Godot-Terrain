@@ -1,0 +1,27 @@
+[gd_resource type="Environment" format=3 uid="uid://bcff8k726n8mj"]
+
+[resource]
+background_mode = 1
+background_color = Color(0.239216, 0.239216, 0.239216, 1)
+tonemap_mode = 2
+tonemap_exposure = 1.2
+tonemap_white = 2.0
+glow_enabled = true
+glow_levels/1 = 1.2
+glow_levels/2 = 10.05
+glow_levels/3 = 7.2
+glow_levels/4 = 19.7
+glow_levels/5 = 6.05
+glow_levels/6 = 2.95
+glow_levels/7 = 4.25
+glow_normalized = true
+glow_intensity = 1.75
+glow_strength = 1.65
+glow_bloom = 0.07
+glow_blend_mode = 0
+glow_hdr_threshold = 0.7
+fog_enabled = true
+fog_light_color = Color(0.717647, 0.423529, 0.717647, 1)
+adjustment_enabled = true
+adjustment_contrast = 1.1
+adjustment_saturation = 1.8
