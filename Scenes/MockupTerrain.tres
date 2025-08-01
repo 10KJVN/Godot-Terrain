@@ -1,0 +1,49 @@
+[gd_resource type="CompositorEffect" script_class="DrawTerrainMesh" load_steps=4 format=3 uid="uid://ccgy1cmj3d5ag"]
+
+[ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/ice-and-snow-ground-1024x1024.jpg" id="1_txatt"]
+[ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/0038-ground-texture-seamless.jpg" id="2_h6myj"]
+[ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="3_x8xe8"]
+
+[resource]
+resource_local_to_scene = false
+resource_name = ""
+enabled = true
+effect_callback_type = 4
+needs_motion_vectors = false
+needs_normal_roughness = false
+script = ExtResource("3_x8xe8")
+regenerate = false
+camera_position = Vector3(59.6998, 25.1318, -80.4745)
+side_length = 512
+mesh_scale = 1.0
+wireframe = false
+noise_seed = 134
+zoom = 88.9
+offset = Vector3(-200, 95.655, -326.08)
+gradient_rotation = 68.645
+octave_count = 9
+rotation = -26.99
+angular_variance = Vector2(-13.94, 15)
+initial_amplitude = 0.739
+amplitude_decay = 0.439
+lacunarity = 1.926
+frequency_variance = Vector2(-0.085, 0.115)
+height_scale = 90.9
+slope_damping = 0.155
+slope_threshold = Vector2(0.84, 0.98)
+low_slope_texture = ExtResource("2_h6myj")
+low_slope_texture_ST = Vector4(1, 1, 1, 1)
+low_slope_color = Color(0.289859, 0.303201, 0.308889, 1)
+high_slope_texture = ExtResource("1_txatt")
+high_slope_texture_ST = Vector4(1, 1, 1, 1)
+high_slope_color = Color(0.0836885, 0.0561016, 0.110095, 1)
+fog_color = Color(0.752941, 0.780392, 0.85098, 1)
+fog_density = 0.002
+fog_height_fade = 0.65
+fog_start = 100.0
+ambient_light = Color(0.14902, 0.14902, 0.14902, 1)
+light_color = Color(0.384314, 0.27451, 0.517647, 1)
+light_intensity = 2.45
+specular_strength = 0.4
+shininess = 8.0
+metadata/_custom_type_script = "uid://7n58awc2ols0"

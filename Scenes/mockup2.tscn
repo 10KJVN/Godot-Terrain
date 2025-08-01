@@ -1,0 +1,124 @@
+[gd_scene load_steps=13 format=3 uid="uid://dt5dahaiwsbhg"]
+
+[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_byc5s"]
+[ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_slapl"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_0hl5s"]
+[ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_2r8jy"]
+[ext_resource type="Script" uid="uid://deo0gxkmk2ahd" path="res://addons/sky_3d/src/Sky3D.gd" id="7_byc5s"]
+[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="8_k1bn2"]
+[ext_resource type="Script" uid="uid://b4tkplvh7fq40" path="res://addons/sky_3d/src/Skydome.gd" id="8_slapl"]
+[ext_resource type="Script" uid="uid://cjmkcj8hwm7ts" path="res://addons/sky_3d/src/TimeOfDay.gd" id="9_0hl5s"]
+[ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="9_nh4yt"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l0x56"]
+shader = ExtResource("2_slapl")
+shader_parameter/Pixelation_Scale = 1.0
+shader_parameter/Panini = 0.0
+shader_parameter/Chromatic_Peripheral = 0.9
+shader_parameter/Chromatic_Aberrations = 0.0
+shader_parameter/Chromatic_Darkening = 0.9
+shader_parameter/Blur_Amount = 3.2
+shader_parameter/Blur_Centered = 0.0
+shader_parameter/Bloom_Starts = 0.9
+shader_parameter/Bloom_Halation = 0.0
+shader_parameter/Bloom_Booster = 0.0
+shader_parameter/Shadows_Split = 0.3
+shader_parameter/Shadow_Color_Temp = 0.0
+shader_parameter/Shadow_Green_Tint = -20.0
+shader_parameter/Shadow_Brightness = 0.9
+shader_parameter/Shadow_Contrast = 1.2
+shader_parameter/Shadows_Saturation = 1.0
+shader_parameter/Highlights_Split = 0.7
+shader_parameter/Mid_Color_Temp = 20.0
+shader_parameter/Mid_Green_Tint = -20.0
+shader_parameter/Mid_Brightness = 0.9
+shader_parameter/Mid_Contrast = 1.0
+shader_parameter/Mid_Saturation = 1.1
+shader_parameter/High_Color_Temp = 0.0
+shader_parameter/High_Green_Tint = 0.0
+shader_parameter/High_Brightness = 1.0
+shader_parameter/High_Contrast = 1.0
+shader_parameter/High_Saturation = 1.0
+shader_parameter/Main_Color_Temp = 5000.0
+shader_parameter/Main_Green_Tint = 0.0
+shader_parameter/Main_Brightness = 1.0
+shader_parameter/Main_Contrast = 1.1
+shader_parameter/Main_Saturation = 1.2
+shader_parameter/Posterization = 0.2
+shader_parameter/Vignette = 0.2
+shader_parameter/Noise = ExtResource("3_0hl5s")
+shader_parameter/Film_Grain = 1.4
+shader_parameter/Filter_Strenght = 0.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_q0gje"]
+lightmap_size_hint = Vector2i(52, 52)
+material = ExtResource("8_k1bn2")
+size = Vector2(1000, 1000)
+orientation = 1
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_2r8jy"]
+auto_exposure_scale = 0.2
+
+[node name="Root" type="Node3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.587785, 0.0338782, 0.808308, 8.73461e-08, -0.999123, 0.0418757, 0.809017, -0.0246138, -0.587269, 0, 0, 0)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.60854)
+script = ExtResource("1_byc5s")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera3D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera3D/CanvasLayer"]
+material = SubResource("ShaderMaterial_l0x56")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 0.257, -27.775, -0.046)
+gi_mode = 2
+mesh = SubResource("QuadMesh_q0gje")
+script = ExtResource("9_nh4yt")
+
+[node name="Sky3D" type="WorldEnvironment" parent="."]
+environment = ExtResource("4_2r8jy")
+camera_attributes = SubResource("CameraAttributesPractical_2r8jy")
+script = ExtResource("7_byc5s")
+lights_enabled = false
+fog_enabled = false
+enable_editor_time = false
+enable_game_time = false
+current_time = 7.47
+cloud_intensity = 2.0
+metadata/_custom_type_script = "uid://deo0gxkmk2ahd"
+
+[node name="SunLight" type="DirectionalLight3D" parent="Sky3D"]
+transform = Transform3D(0, -0.545639, 0.83802, 0.882749, 0.39374, 0.256366, -0.469845, 0.739762, 0.481662, 0.83802, 0.256366, 0.481662)
+light_color = Color(0.990255, 0.767573, 0.655988, 1)
+light_energy = 0.0
+
+[node name="MoonLight" type="DirectionalLight3D" parent="Sky3D"]
+transform = Transform3D(0, -0.473744, -0.880663, -0.997742, 0.0591501, -0.0318192, 0.0671655, 0.878674, -0.472674, -0.880663, -0.0318192, -0.472674)
+light_color = Color(0.572549, 0.776471, 0.956863, 1)
+light_energy = 0.0
+
+[node name="Skydome" type="Node" parent="Sky3D"]
+script = ExtResource("8_slapl")
+sun_azimuth = -119.889
+sun_altitude = -75.1454
+moon_azimuth = -298.223
+moon_altitude = -91.8234
+fog_visible = false
+clouds_cumulus_intensity = 2.0
+
+[node name="TimeOfDay" type="Node" parent="Sky3D"]
+script = ExtResource("9_0hl5s")
+update_in_editor = false
+update_in_game = false
+dome_path = NodePath("../Skydome")
+total_hours = 7.47

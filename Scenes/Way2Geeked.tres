@@ -1,8 +1,18 @@
-[gd_resource type="Environment" format=3 uid="uid://bcff8k726n8mj"]
+[gd_resource type="Environment" load_steps=4 format=3 uid="uid://bcff8k726n8mj"]
+
+[ext_resource type="Material" uid="uid://b7300s888mhmf" path="res://SkyPreset.tres" id="1_105eu"]
+[ext_resource type="Texture2D" uid="uid://c0l1sxlflr8lo" path="res://textures/Lens_Dirt/lensDirt4.png" id="1_ugeco"]
+
+[sub_resource type="Sky" id="Sky_ugeco"]
+sky_material = ExtResource("1_105eu")
 
 [resource]
-background_mode = 1
+background_mode = 2
 background_color = Color(0.239216, 0.239216, 0.239216, 1)
+background_energy_multiplier = 0.3
+sky = SubResource("Sky_ugeco")
+sky_custom_fov = 50.0
+ambient_light_color = Color(0.652498, 0.506807, 0.434332, 1)
 tonemap_mode = 2
 tonemap_exposure = 1.2
 tonemap_white = 2.0
@@ -20,8 +30,10 @@ glow_strength = 1.65
 glow_bloom = 0.07
 glow_blend_mode = 0
 glow_hdr_threshold = 0.7
+glow_map = ExtResource("1_ugeco")
 fog_enabled = true
 fog_light_color = Color(0.717647, 0.423529, 0.717647, 1)
+fog_sky_affect = 0.03
 adjustment_enabled = true
 adjustment_contrast = 1.1
 adjustment_saturation = 1.8
