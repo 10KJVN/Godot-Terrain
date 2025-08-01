@@ -401,8 +401,8 @@ func _render_callback(_effect_callback_type : int, render_data : RenderData):
 		var tree := Engine.get_main_loop() as SceneTree
 		var root : Node = tree.edited_scene_root if Engine.is_editor_hint() else tree.current_scene
 		light = root.get_node_or_null('DirectionalLight3D')
-		if not light:
-			push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
+		#if not light:
+			#push_error("No light source detected please put a DirectionalLight3D into the scene thank you")
 	else:
 		_fallback_light_direction = light.transform.basis.z.normalized()
 		

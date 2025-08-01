@@ -1,16 +1,16 @@
 [gd_scene load_steps=12 format=3 uid="uid://etlrqir3d7md"]
 
-[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_pp484"]
-[ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_hixww"]
-[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_0tf3h"]
-[ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_0naof"]
-[ext_resource type="CompositorEffect" uid="uid://ccgy1cmj3d5ag" path="res://Scenes/MockupTerrain.tres" id="5_0tf3h"]
-[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="7_l0x56"]
-[ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="8_0naof"]
-[ext_resource type="AudioStream" uid="uid://gkk1qn64jxgx" path="res://audio/LiveFastDieSlay 4Kaine - Kankan - SoundLoadMate.com.mp3" id="10_ysod4"]
+[ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_huasi"]
+[ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_m1efj"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_mai8y"]
+[ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_76v2p"]
+[ext_resource type="CompositorEffect" uid="uid://ccgy1cmj3d5ag" path="res://Scenes/MockupTerrain.tres" id="5_drdnd"]
+[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="6_ioaeq"]
+[ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="7_7ewk0"]
+[ext_resource type="AudioStream" uid="uid://gkk1qn64jxgx" path="res://audio/LiveFastDieSlay 4Kaine - Kankan - SoundLoadMate.com.mp3" id="8_lhp3t"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l0x56"]
-shader = ExtResource("2_hixww")
+shader = ExtResource("2_m1efj")
 shader_parameter/Pixelation_Scale = 1.0
 shader_parameter/Panini = 0.0
 shader_parameter/Chromatic_Peripheral = 0.9
@@ -45,16 +45,16 @@ shader_parameter/Main_Contrast = 1.1
 shader_parameter/Main_Saturation = 1.2
 shader_parameter/Posterization = 0.2
 shader_parameter/Vignette = 0.2
-shader_parameter/Noise = ExtResource("3_0tf3h")
+shader_parameter/Noise = ExtResource("3_mai8y")
 shader_parameter/Film_Grain = 1.4
 shader_parameter/Filter_Strenght = 0.0
 
 [sub_resource type="Compositor" id="Compositor_1i1cu"]
-compositor_effects = Array[CompositorEffect]([ExtResource("5_0tf3h"), null])
+compositor_effects = Array[CompositorEffect]([ExtResource("5_drdnd"), null])
 
 [sub_resource type="QuadMesh" id="QuadMesh_q0gje"]
 lightmap_size_hint = Vector2i(52, 52)
-material = ExtResource("7_l0x56")
+material = ExtResource("6_ioaeq")
 size = Vector2(512, 512)
 subdivide_width = 16
 subdivide_depth = 32
@@ -67,7 +67,7 @@ transform = Transform3D(0.587785, 0.0338782, 0.808308, 8.73461e-08, -0.999123, 0
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(0.5, 0.0754791, 0.86273, 0, 0.996195, -0.0871557, -0.866025, 0.0435779, 0.498097, 0, 36, 2.5)
-script = ExtResource("1_pp484")
+script = ExtResource("1_huasi")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="Camera3D"]
 
@@ -81,18 +81,17 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = ExtResource("4_0naof")
+environment = ExtResource("4_76v2p")
 compositor = SubResource("Compositor_1i1cu")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 1.9783, -10.802, -3.4703)
-visible = false
 mesh = SubResource("QuadMesh_q0gje")
-script = ExtResource("8_0naof")
+script = ExtResource("7_7ewk0")
 sky_3d_node = NodePath("../Sky3D")
 
 [node name="LiveFastDieSlay4Kaine-Kankan-SoundLoadMate_com" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("10_ysod4")
+stream = ExtResource("8_lhp3t")
 volume_db = -5.0
 autoplay = true
 playback_type = 1

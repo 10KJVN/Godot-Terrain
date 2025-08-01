@@ -1,13 +1,57 @@
-[gd_scene load_steps=8 format=3 uid="uid://bs3wao3xrtlmq"]
+[gd_scene load_steps=12 format=3 uid="uid://bs3wao3xrtlmq"]
 
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_hekff"]
 [ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/ice-and-snow-ground-1024x1024.jpg" id="2_28aoi"]
+[ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_l8v81"]
 [ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="2_pyidc"]
 [ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/0038-ground-texture-seamless.jpg" id="3_28aoi"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_l8v81"]
+[ext_resource type="Sky" uid="uid://cdgmexsolm4l1" path="res://UniqueSky01.tres" id="4_vyht1"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bf3um"]
+shader = ExtResource("2_l8v81")
+shader_parameter/Pixelation_Scale = 1.0
+shader_parameter/Panini = 0.0
+shader_parameter/Chromatic_Peripheral = 0.9
+shader_parameter/Chromatic_Aberrations = 0.0
+shader_parameter/Chromatic_Darkening = 0.9
+shader_parameter/Blur_Amount = 0.0
+shader_parameter/Blur_Centered = 0.0
+shader_parameter/Bloom_Starts = 0.9
+shader_parameter/Bloom_Halation = 0.0
+shader_parameter/Bloom_Booster = 0.0
+shader_parameter/Shadows_Split = 0.3
+shader_parameter/Shadow_Color_Temp = 0.0
+shader_parameter/Shadow_Green_Tint = 0.0
+shader_parameter/Shadow_Brightness = 1.0
+shader_parameter/Shadow_Contrast = 1.0
+shader_parameter/Shadows_Saturation = 1.0
+shader_parameter/Highlights_Split = 0.7
+shader_parameter/Mid_Color_Temp = 0.0
+shader_parameter/Mid_Green_Tint = 0.0
+shader_parameter/Mid_Brightness = 1.0
+shader_parameter/Mid_Contrast = 1.0
+shader_parameter/Mid_Saturation = 1.0
+shader_parameter/High_Color_Temp = 0.0
+shader_parameter/High_Green_Tint = 0.0
+shader_parameter/High_Brightness = 1.0
+shader_parameter/High_Contrast = 1.0
+shader_parameter/High_Saturation = 1.0
+shader_parameter/Main_Color_Temp = 4500.0
+shader_parameter/Main_Green_Tint = 0.0
+shader_parameter/Main_Brightness = 1.0
+shader_parameter/Main_Contrast = 1.0
+shader_parameter/Main_Saturation = 1.0
+shader_parameter/Posterization = 0.0
+shader_parameter/Vignette = 0.0
+shader_parameter/Noise = ExtResource("3_l8v81")
+shader_parameter/Film_Grain = 0.4
+shader_parameter/Filter_Strenght = 0.0
 
 [sub_resource type="Environment" id="Environment_7owt0"]
-background_mode = 1
+background_mode = 2
 background_color = Color(0.239216, 0.239216, 0.239216, 1)
+sky = ExtResource("4_vyht1")
 tonemap_white = 1.68
 glow_normalized = true
 glow_intensity = 1.75
@@ -23,7 +67,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("2_pyidc")
 regenerate = false
-camera_position = Vector3(-35.7935, 5.93624, 50.8995)
+camera_position = Vector3(15.3852, 25.097, 15.4085)
 side_length = 400
 mesh_scale = 0.5
 wireframe = false
@@ -69,6 +113,17 @@ transform = Transform3D(0.587785, 0.0338782, 0.808308, 8.73461e-08, -0.999123, 0
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2.60854)
 script = ExtResource("1_hekff")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera3D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera3D/CanvasLayer"]
+material = SubResource("ShaderMaterial_bf3um")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_7owt0")
