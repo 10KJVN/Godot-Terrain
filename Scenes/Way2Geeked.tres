@@ -9,7 +9,7 @@ sky_material = ExtResource("1_105eu")
 [resource]
 background_mode = 2
 background_color = Color(0.239216, 0.239216, 0.239216, 1)
-background_energy_multiplier = 0.3
+background_energy_multiplier = 0.7
 sky = SubResource("Sky_ugeco")
 sky_custom_fov = 55.5
 ambient_light_color = Color(0.652498, 0.506807, 0.434332, 1)
