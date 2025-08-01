@@ -13,7 +13,8 @@ config_version=5
 config/name="Way2Terrain"
 run/main_scene="uid://c3n4f7gefvqde"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+run/max_fps=60
+config/icon="uid://dtwyeaoa3bxod"
 
 [audio]
 
