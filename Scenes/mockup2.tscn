@@ -94,13 +94,12 @@ fog_enabled = false
 enable_editor_time = false
 enable_game_time = false
 current_time = 7.47
-cloud_intensity = 2.0
 metadata/_custom_type_script = "uid://deo0gxkmk2ahd"
 
 [node name="SunLight" type="DirectionalLight3D" parent="Sky3D"]
 transform = Transform3D(0, -0.545639, 0.83802, 0.882749, 0.39374, 0.256366, -0.469845, 0.739762, 0.481662, 0.83802, 0.256366, 0.481662)
 light_color = Color(0.990255, 0.767573, 0.655988, 1)
-light_energy = 0.0
+shadow_enabled = true
 
 [node name="MoonLight" type="DirectionalLight3D" parent="Sky3D"]
 transform = Transform3D(0, -0.473744, -0.880663, -0.997742, 0.0591501, -0.0318192, 0.0671655, 0.878674, -0.472674, -0.880663, -0.0318192, -0.472674)

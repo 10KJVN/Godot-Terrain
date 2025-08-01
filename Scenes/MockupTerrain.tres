@@ -7,13 +7,13 @@
 [resource]
 resource_local_to_scene = false
 resource_name = ""
-enabled = true
+enabled = false
 effect_callback_type = 4
 needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("3_x8xe8")
 regenerate = false
-camera_position = Vector3(59.6998, 25.1318, -80.4745)
+camera_position = Vector3(20.038, 46.9395, -84.2256)
 side_length = 512
 mesh_scale = 1.0
 wireframe = false
@@ -36,7 +36,7 @@ low_slope_texture_ST = Vector4(1, 1, 1, 1)
 low_slope_color = Color(0.289859, 0.303201, 0.308889, 1)
 high_slope_texture = ExtResource("1_txatt")
 high_slope_texture_ST = Vector4(1, 1, 1, 1)
-high_slope_color = Color(0.0836885, 0.0561016, 0.110095, 1)
+high_slope_color = Color(0.101961, 0.0588235, 0.0470588, 1)
 fog_color = Color(0.752941, 0.780392, 0.85098, 1)
 fog_density = 0.002
 fog_height_fade = 0.65
