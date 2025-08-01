@@ -29,7 +29,7 @@ void fragment() {
     // Sample reflection
     vec2 ref_uv = SCREEN_UV - NORMAL.xz * mix(0.05, 0.15, day_intensity);
     ref_uv = clamp(ref_uv, vec2(0.001), vec2(0.999));
-    vec3 reflection = textureLod(SCREEN_TEXTURE, ref_uv, 0.0).rgb;
+    //vec3 reflection = textureLod(SCREEN_TEXTURE, ref_uv, 0.0).rgb;
     
     // Calculate lighting contributions
     vec3 night_color = water_color * vec3(0.5, 0.6, 0.8);
@@ -37,12 +37,23 @@ void fragment() {
     vec3 ambient = ambient_light * mix(0.8, 0.3, day_intensity);
     
     float fresnel = pow(1.0 - max(0.0, dot(NORMAL, VIEW)), 2.0);
+	float edge = pow(1.0 - abs (dot(NORMAL, VIEW)), 3.0);
+	
+    // UV-distorted reflection
+    vec2 distorted_uv = SCREEN_UV + sin(TIME * 0.5 + SCREEN_UV.x * 10.0) * 0.02;
+    vec3 reflection = textureLod(SCREEN_TEXTURE, distorted_uv, 0.0).rgb;
+    reflection.r *= 1.2;
+    reflection.b *= 1.5;
     
-    ALBEDO = mix(water_color * ambient, reflection * (base_color + ambient), fresnel);
-    ALPHA = mix(0.7, 0.85, day_intensity);
+    //ALBEDO = mix(water_color * ambient, reflection * (base_color + ambient), fresnel);
+    //ALPHA = mix(0.7, 0.85, day_intensity);
+	
+    ALBEDO = mix(water_color.rgb, reflection, 0.7);
+    ALPHA = water_color.b;
     
     // Material properties
     METALLIC = mix(0.1, 0.3, day_intensity);
     ROUGHNESS = mix(0.15, 0.1, day_intensity);
     SPECULAR = mix(0.3, 0.5, day_intensity);
+    EMISSION = edge * vec3(1.0, 0.3, 0.8) * 0.5;
 }
