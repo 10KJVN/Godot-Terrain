@@ -85,6 +85,7 @@ compositor = SubResource("Compositor_1i1cu")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 0, 0, 0)
+visible = false
 mesh = SubResource("QuadMesh_q0gje")
 script = ExtResource("8_0naof")
 sky_3d_node = NodePath("../Sky3D")
