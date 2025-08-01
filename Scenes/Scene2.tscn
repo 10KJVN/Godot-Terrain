@@ -147,7 +147,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("9_83ori")
 regenerate = false
-camera_position = Vector3(-49.8762, 21.8653, -37.0288)
+camera_position = Vector3(-81.6872, 58.5614, -162.581)
 side_length = 800
 mesh_scale = 0.5
 wireframe = false
@@ -195,7 +195,7 @@ orientation = 1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sk61g"]
 shader = ExtResource("17_17rxl")
-shader_parameter/Pixelation_Scale = 1.0
+shader_parameter/Pixelation_Scale = 5.0
 shader_parameter/Panini = 0.0
 shader_parameter/Chromatic_Peripheral = 0.9
 shader_parameter/Chromatic_Aberrations = 0.0
@@ -227,10 +227,10 @@ shader_parameter/Main_Green_Tint = 0.0
 shader_parameter/Main_Brightness = 1.0
 shader_parameter/Main_Contrast = 1.1
 shader_parameter/Main_Saturation = 1.2
-shader_parameter/Posterization = 0.2
-shader_parameter/Vignette = 0.2
+shader_parameter/Posterization = 0.1
+shader_parameter/Vignette = 0.1
 shader_parameter/Noise = ExtResource("18_b53t1")
-shader_parameter/Film_Grain = 1.4
+shader_parameter/Film_Grain = 1.81
 shader_parameter/Filter_Strenght = 0.0
 
 [node name="NewScene02" type="Node3D"]
