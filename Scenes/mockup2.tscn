@@ -81,6 +81,7 @@ mouse_filter = 2
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 0.257, -27.775, -0.046)
+visible = false
 gi_mode = 2
 mesh = SubResource("QuadMesh_q0gje")
 script = ExtResource("9_nh4yt")
