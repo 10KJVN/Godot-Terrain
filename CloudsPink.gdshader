@@ -20,8 +20,8 @@ uniform float horizon_level = 0.0;
 
 // Atmospheric Scattering
 group_uniforms Atmospheric_Scattering_and_Colors;
-uniform float atm_darkness = 0.5;
-uniform float atm_sun_intensity = 18.0;
+uniform float atm_darkness = 1;
+uniform float atm_sun_intensity = 0;
 uniform vec4 atm_day_tint: source_color = vec4(0.808, 0.91, 1.0, 1.0);
 uniform vec4 atm_horizon_light_tint: source_color = vec4(0.98, 0.635, 0.463, 1.0);
 uniform vec4 atm_night_tint: source_color = vec4 (0.041, 0.049, 0.061, 0.245);
@@ -84,18 +84,18 @@ through various sources and calculations.
 // Clouds
 group_uniforms Clouds;
 uniform bool clouds_visible = true;
-uniform float clouds_coverage = 0.5;
-uniform float clouds_thickness = 10.0;
-uniform float clouds_absorption = 2.0;
+uniform float clouds_coverage = 0.6;
+uniform float clouds_thickness = 0.495;
+uniform float clouds_absorption = 2.735;
 uniform float clouds_sky_tint_fade = 0.5;
 uniform float clouds_intensity = 10.0;
 uniform float clouds_size = 2.0;
 uniform vec2 clouds_uv = vec2(0.16, 0.11);
-uniform float clouds_speed = 0.07;
+uniform float clouds_speed = 0.014;
 uniform vec2 clouds_direction = vec2(0.25);
-uniform vec4 clouds_day_color: source_color = vec4(0.824, 0.875, 1.0, 1.0);
-uniform vec4 clouds_horizon_light_color: source_color = vec4(0.98, 0.43, 0.15, 1.0);
-uniform vec4 clouds_night_color: source_color = vec4(0.09, 0.094, 0.129, 1.0);
+uniform vec4 clouds_day_color: source_color = vec4(0.96, 0.23, 1.0, 1.0);
+uniform vec4 clouds_horizon_light_color: source_color = vec4(0.98, 0.80, 0.92, 1.0);
+uniform vec4 clouds_night_color: source_color = vec4(0.92, 0.6, 1.0, 1.0);
 uniform sampler2D clouds_texture;
 
 group_uniforms Cumulus_Clouds;
@@ -105,14 +105,14 @@ uniform float cumulus_clouds_thickness = 0.0243;
 uniform float cumulus_clouds_absorption = 2.0;
 uniform float cumulus_clouds_noise_freq = 2.7;
 uniform float cumulus_clouds_sky_tint_fade = 0.0;
-uniform float cumulus_clouds_intensity = 1.0;
+uniform float cumulus_clouds_intensity = 0.07;
 uniform float cumulus_clouds_size = 0.5;
-uniform float cumulus_clouds_speed = 0.05;
+uniform float cumulus_clouds_speed = 0.15;
 uniform vec3 cumulus_clouds_direction = vec3(0.25, 0.1, 0.25);
 uniform sampler2D cumulus_clouds_texture;
-uniform vec4 cumulus_clouds_day_color: source_color = vec4(0.824, 0.875, 1.0, 1.0);
-uniform vec4 cumulus_clouds_horizon_light_color: source_color = vec4(0.98, 0.443, 0.15, 1.0);
-uniform vec4 cumulus_clouds_night_color: source_color = vec4(0.09, 0.094, 0.129, 1.0);
+uniform vec4 cumulus_clouds_day_color: source_color = vec4(0.9, 0.4, 1.0, 0.7);
+uniform vec4 cumulus_clouds_horizon_light_color: source_color = vec4(0.98, 0.8, 1.0, 1.0);
+uniform vec4 cumulus_clouds_night_color: source_color = vec4(0.3, 0.0, 0.6, 1.0);
 uniform vec3 cumulus_clouds_partial_mie_phase = vec3(0.95756, 1.04244, 0.412);
 uniform float cumulus_clouds_mie_intensity = 1.0;
 
