@@ -1,6 +1,6 @@
 [gd_resource type="ShaderMaterial" load_steps=8 format=3 uid="uid://b7300s888mhmf"]
 
-[ext_resource type="Shader" uid="uid://dxmvccxw1lnxp" path="res://addons/sky_3d/shaders/Sky_Preset.gdshader" id="1_nk5qb"]
+[ext_resource type="Shader" uid="uid://cvd0x7lon1ur6" path="res://addons/sky_3d/shaders/SkyMaterial.gdshader" id="1_nk5qb"]
 [ext_resource type="Texture2D" uid="uid://c1vwcdcdvb74a" path="res://addons/sky_3d/assets/thirdparty/textures/milkyway/Milkyway.jpg" id="2_bkvyo"]
 [ext_resource type="Texture2D" uid="uid://cfqk60lpl5ljv" path="res://addons/sky_3d/assets/resources/SNoise.tres" id="3_xpj2h"]
 [ext_resource type="Texture2D" uid="uid://cecwdqjol0ckd" path="res://addons/sky_3d/assets/textures/noiseClouds.png" id="4_w8bsl"]
@@ -28,17 +28,17 @@ shader_parameter/atm_thickness = 0.7
 shader_parameter/atm_beta_ray = Vector3(5.80454e-06, 1.35629e-05, 3.31126e-05)
 shader_parameter/atm_beta_mie = Vector3(3.038e-08, 3.038e-08, 3.038e-08)
 shader_parameter/sun_disk_color = Color(0.996, 0.541, 0.14, 1)
-shader_parameter/sun_disk_intensity = 0.0
+shader_parameter/sun_disk_intensity = 2.0
 shader_parameter/sun_disk_size = 0.015
 shader_parameter/atm_sun_mie_tint = Color(1, 1, 1, 1)
 shader_parameter/atm_sun_mie_intensity = 1.0
 shader_parameter/atm_sun_partial_mie_phase = Vector3(0.36, 1.64, 1.6)
 shader_parameter/moon_color = Color(1, 1, 1, 1)
 shader_parameter/moon_texture = ExtResource("5_kmjpw")
-shader_parameter/moon_texture_alignment = Vector3(7.03, 3.455, 4.8)
+shader_parameter/moon_texture_alignment = Vector3(5.93, 1.4, 4.8)
 shader_parameter/moon_texture_flip_u = false
 shader_parameter/moon_texture_flip_v = false
-shader_parameter/moon_size = 0.07
+shader_parameter/moon_size = 0.06
 shader_parameter/atm_moon_mie_tint = Color(0.137255, 0.184314, 0.292196, 1)
 shader_parameter/atm_moon_mie_intensity = 0.0305435
 shader_parameter/atm_moon_partial_mie_phase = Vector3(0.36, 1.64, 1.6)
@@ -62,24 +62,24 @@ shader_parameter/clouds_size = 2.0
 shader_parameter/clouds_uv = Vector2(0.16, 0.11)
 shader_parameter/clouds_speed = 0.11
 shader_parameter/clouds_direction = Vector2(0.25, 0.25)
-shader_parameter/clouds_day_color = Color(0.965656, 0.235635, 1, 1)
-shader_parameter/clouds_horizon_light_color = Color(1, 0.801622, 0.921856, 1)
-shader_parameter/clouds_night_color = Color(0.3, 0, 0.6, 1)
+shader_parameter/clouds_day_color = Color(0.8, 0.2, 1, 1)
+shader_parameter/clouds_horizon_light_color = Color(1, 0.75, 0.888, 1)
+shader_parameter/clouds_night_color = Color(0.42, 0.002, 0.785, 1)
 shader_parameter/clouds_texture = ExtResource("3_xpj2h")
 shader_parameter/cumulus_clouds_visible = true
-shader_parameter/cumulus_clouds_coverage = 0.249
-shader_parameter/cumulus_clouds_thickness = 0.01
-shader_parameter/cumulus_clouds_absorption = 2.7
+shader_parameter/cumulus_clouds_coverage = 0.55
+shader_parameter/cumulus_clouds_thickness = 0.225
+shader_parameter/cumulus_clouds_absorption = 0.002
 shader_parameter/cumulus_clouds_noise_freq = 2.7
-shader_parameter/cumulus_clouds_sky_tint_fade = 1.915
-shader_parameter/cumulus_clouds_intensity = 2.0
-shader_parameter/cumulus_clouds_size = 1.0
+shader_parameter/cumulus_clouds_sky_tint_fade = 0.0
+shader_parameter/cumulus_clouds_intensity = 0.195
+shader_parameter/cumulus_clouds_size = 0.5
 shader_parameter/cumulus_clouds_speed = 0.15
 shader_parameter/cumulus_clouds_direction = Vector3(0.25, 0.1, 0.25)
 shader_parameter/cumulus_clouds_texture = ExtResource("4_w8bsl")
-shader_parameter/cumulus_clouds_day_color = Color(0.9, 0.4, 1, 0.7)
-shader_parameter/cumulus_clouds_horizon_light_color = Color(0.646225, 0.200496, 0.255371, 1)
-shader_parameter/cumulus_clouds_night_color = Color(0.4, 0, 0.8, 1)
+shader_parameter/cumulus_clouds_day_color = Color(0.401808, 0.00194544, 0.848216, 0.7)
+shader_parameter/cumulus_clouds_horizon_light_color = Color(0.474607, 0.567942, 0.947117, 1)
+shader_parameter/cumulus_clouds_night_color = Color(0.553, 0.552, 0.552, 1)
 shader_parameter/cumulus_clouds_partial_mie_phase = Vector3(0.957564, 1.04244, 0.412)
 shader_parameter/cumulus_clouds_mie_intensity = 1.0
 shader_parameter/moon_matrix = Basis(3.72529e-09, -0.997742, 0.0671655, -0.473744, 0.0591501, 0.878674, -0.880663, -0.0318192, -0.472674)

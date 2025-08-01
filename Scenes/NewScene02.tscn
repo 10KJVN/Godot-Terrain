@@ -1,6 +1,6 @@
-[gd_scene load_steps=26 format=3 uid="uid://vxfj52skora1"]
+[gd_scene load_steps=27 format=3 uid="uid://vxfj52skora1"]
 
-[ext_resource type="Shader" uid="uid://dxmvccxw1lnxp" path="res://addons/sky_3d/shaders/Sky_Preset.gdshader" id="1_lvxco"]
+[ext_resource type="Shader" uid="uid://cvd0x7lon1ur6" path="res://addons/sky_3d/shaders/SkyMaterial.gdshader" id="1_lvxco"]
 [ext_resource type="Texture2D" uid="uid://c1vwcdcdvb74a" path="res://addons/sky_3d/assets/thirdparty/textures/milkyway/Milkyway.jpg" id="2_kro42"]
 [ext_resource type="Texture2D" uid="uid://cfqk60lpl5ljv" path="res://addons/sky_3d/assets/resources/SNoise.tres" id="3_1ty8j"]
 [ext_resource type="Texture2D" uid="uid://cecwdqjol0ckd" path="res://addons/sky_3d/assets/textures/noiseClouds.png" id="4_mu6w4"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" uid="uid://cjmkcj8hwm7ts" path="res://addons/sky_3d/src/TimeOfDay.gd" id="11_yuxwe"]
 [ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="12_kro42"]
 [ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="13_1ty8j"]
+[ext_resource type="AudioStream" uid="uid://d1l1uci12qa7q" path="res://audio/Darkplugg Freestyle - Kappastar - SoundLoadMate.com.mp3" id="13_5hbym"]
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="14_mu6w4"]
 [ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="16_lvxco"]
 [ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="17_5hbym"]
@@ -131,20 +132,25 @@ adjustment_contrast = 1.1
 adjustment_saturation = 1.85
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_ukmhn"]
-dof_blur_far_distance = 3.85
+dof_blur_far_enabled = true
+dof_blur_far_distance = 50.0
+dof_blur_near_enabled = true
+dof_blur_near_distance = 5.0
 
 [sub_resource type="CompositorEffect" id="CompositorEffect_6s10p"]
 resource_local_to_scene = false
 resource_name = ""
 enabled = true
-effect_callback_type = 4
+effect_callback_type = 3
+access_resolved_color = true
+access_resolved_depth = true
 needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("8_5hbym")
 regenerate = false
-camera_position = Vector3(94.8743, 330.264, 493.068)
+camera_position = Vector3(-54.9309, 42.608, -38.9478)
 side_length = 800
-mesh_scale = 1.0
+mesh_scale = 0.5
 wireframe = false
 noise_seed = 136
 zoom = 142.5
@@ -155,9 +161,9 @@ rotation = -26.99
 angular_variance = Vector2(-15, 15)
 initial_amplitude = 0.859
 amplitude_decay = 0.439
-lacunarity = 1.746
+lacunarity = 1.866
 frequency_variance = Vector2(-0.085, 0.115)
-height_scale = 95.4
+height_scale = 80.0
 slope_damping = 0.155
 slope_threshold = Vector2(0.84, 0.98)
 low_slope_texture = ExtResource("8_o4ep3")
@@ -183,7 +189,9 @@ compositor_effects = Array[CompositorEffect]([SubResource("CompositorEffect_6s10
 [sub_resource type="QuadMesh" id="QuadMesh_yrbqa"]
 lightmap_size_hint = Vector2i(52, 52)
 material = ExtResource("12_kro42")
-size = Vector2(1000, 1000)
+size = Vector2(4000, 4000)
+subdivide_width = 15
+subdivide_depth = 250
 orientation = 1
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sk61g"]
@@ -287,6 +295,11 @@ month = 2
 celestials_calculations = 0
 utc = 6.0
 
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Sky3D"]
+stream = ExtResource("13_5hbym")
+volume_db = -12.0
+autoplay = true
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.999978, -0.00575738, 0.00314607, 0.00575782, 0.999983, -0.000131578, -0.00314526, 0.000149677, 0.999995, 0.256973, -13.5755, -0.0458298)
 gi_mode = 2
@@ -295,6 +308,7 @@ script = ExtResource("13_1ty8j")
 sky_3d_node = NodePath("../Sky3D")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 33.333, 0)
 script = ExtResource("14_mu6w4")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="Camera3D"]

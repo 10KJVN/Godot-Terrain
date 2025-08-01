@@ -7,14 +7,14 @@
 [resource]
 resource_local_to_scene = false
 resource_name = ""
-enabled = false
+enabled = true
 effect_callback_type = 4
 needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("3_x8xe8")
 regenerate = false
-camera_position = Vector3(-166.6, 200.799, -114.848)
-side_length = 1024
+camera_position = Vector3(-821.263, 36.0619, 56.6856)
+side_length = 2048
 mesh_scale = 0.5
 wireframe = false
 noise_seed = 134

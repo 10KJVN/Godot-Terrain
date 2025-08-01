@@ -10,10 +10,24 @@ config_version=5
 
 [application]
 
-config/name="terrain"
-run/main_scene="res://root.tscn"
+config/name="Way2Terrain"
+run/main_scene="uid://etlrqir3d7md"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
+
+[audio]
+
+manager/sound/bus="Sound"
+manager/sound/pool_1D_size=16
+manager/sound/pool_2D_size=16
+manager/sound/pool_3D_size=16
+manager/sound/max_polyphony=32
+manager/music/bus="Music"
+
+[autoload]
+
+SoundManager="*res://addons/resonate/sound_manager/sound_manager.gd"
+MusicManager="*res://addons/resonate/music_manager/music_manager.gd"
 
 [dotnet]
 
@@ -21,7 +35,7 @@ project/assembly_name="terrain"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/sky_3d/plugin.cfg")
+enabled=PackedStringArray("res://addons/resonate/plugin.cfg", "res://addons/sky_3d/plugin.cfg")
 
 [rendering]
 

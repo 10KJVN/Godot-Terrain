@@ -1,16 +1,13 @@
-[gd_resource type="Environment" load_steps=4 format=3 uid="uid://bcff8k726n8mj"]
+[gd_resource type="Environment" load_steps=3 format=3 uid="uid://bcff8k726n8mj"]
 
-[ext_resource type="Material" uid="uid://b7300s888mhmf" path="res://SkyPreset.tres" id="1_105eu"]
 [ext_resource type="Texture2D" uid="uid://c0l1sxlflr8lo" path="res://textures/Lens_Dirt/lensDirt4.png" id="1_ugeco"]
-
-[sub_resource type="Sky" id="Sky_ugeco"]
-sky_material = ExtResource("1_105eu")
+[ext_resource type="Sky" uid="uid://cdgmexsolm4l1" path="res://UniqueSky01.tres" id="2_ugeco"]
 
 [resource]
 background_mode = 2
 background_color = Color(0.239216, 0.239216, 0.239216, 1)
 background_energy_multiplier = 0.7
-sky = SubResource("Sky_ugeco")
+sky = ExtResource("2_ugeco")
 sky_custom_fov = 55.5
 ambient_light_color = Color(0.652498, 0.506807, 0.434332, 1)
 tonemap_mode = 2
