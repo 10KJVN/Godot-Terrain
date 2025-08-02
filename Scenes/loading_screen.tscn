@@ -30,6 +30,7 @@ grow_vertical = 2
 
 [node name="CanvasLayer_BGCOL" type="CanvasLayer" parent="CanvasGroup"]
 layer = -1
+follow_viewport_enabled = true
 
 [node name="ColorRect" type="ColorRect" parent="CanvasGroup/CanvasLayer_BGCOL"]
 z_index = -1
@@ -42,13 +43,16 @@ color = Color(0.0784314, 0.0156863, 0.160784, 1)
 
 [node name="CanvasLayer_Splash" type="CanvasLayer" parent="CanvasGroup"]
 layer = 0
+follow_viewport_enabled = true
 
-[node name="ResizedW2tLogo2" type="Sprite2D" parent="CanvasGroup/CanvasLayer_Splash"]
-modulate = Color(0.80049, 0.800491, 0.800491, 1)
-position = Vector2(643, 362)
+[node name="TextureRect" type="TextureRect" parent="CanvasGroup/CanvasLayer_Splash"]
+modulate = Color(0.800491, 0.800491, 0.800491, 1)
+offset_right = 1280.0
+offset_bottom = 720.0
 texture = ExtResource("2_nfm0g")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="CanvasGroup"]
+follow_viewport_enabled = true
 
 [node name="ProgressBar" type="ProgressBar" parent="CanvasGroup/CanvasLayer"]
 unique_name_in_owner = true
@@ -68,4 +72,5 @@ theme_override_colors/font_outline_color = Color(0.819608, 0.0588235, 0.882353, 
 theme_override_constants/outline_size = 8
 theme_override_font_sizes/font_size = 48
 theme_override_styles/fill = SubResource("StyleBoxFlat_nfm0g")
+step = 1.0
 script = ExtResource("1_0t5xw")
