@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="Way2Terrain"
+config/version="1.1"
 run/main_scene="uid://c3n4f7gefvqde"
 config/features=PackedStringArray("4.4", "Forward Plus")
 run/max_fps=60
 boot_splash/bg_color=Color(0.0784314, 0.0156863, 0.160784, 1)
-boot_splash/use_filter=false
 boot_splash/image="uid://bbwpfy5tmsaef"
-config/icon="uid://dtwyeaoa3bxod"
+config/icon="uid://x3d152so3ubn"
 
 [audio]
 
