@@ -1,0 +1,71 @@
+[gd_scene load_steps=4 format=3 uid="uid://bhlg71m4xf2hn"]
+
+[ext_resource type="Script" uid="uid://dsad25l6hyren" path="res://Scripts/loading.gd" id="1_0t5xw"]
+[ext_resource type="Texture2D" uid="uid://bbwpfy5tmsaef" path="res://textures/resized_W2T_Logo2.png" id="2_nfm0g"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nfm0g"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+skew = Vector2(0.19, 0)
+border_width_left = 10
+border_width_top = 10
+border_width_right = 10
+border_width_bottom = 10
+border_color = Color(0.00784314, 0.00392157, 0.027451, 1)
+border_blend = true
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+shadow_size = 10
+
+[node name="LoadingScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasGroup" type="CanvasGroup" parent="."]
+
+[node name="CanvasLayer_BGCOL" type="CanvasLayer" parent="CanvasGroup"]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="CanvasGroup/CanvasLayer_BGCOL"]
+z_index = -1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0784314, 0.0156863, 0.160784, 1)
+
+[node name="CanvasLayer_Splash" type="CanvasLayer" parent="CanvasGroup"]
+layer = 0
+
+[node name="ResizedW2tLogo2" type="Sprite2D" parent="CanvasGroup/CanvasLayer_Splash"]
+modulate = Color(0.80049, 0.800491, 0.800491, 1)
+position = Vector2(643, 362)
+texture = ExtResource("2_nfm0g")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="CanvasGroup"]
+
+[node name="ProgressBar" type="ProgressBar" parent="CanvasGroup/CanvasLayer"]
+unique_name_in_owner = true
+z_index = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 260.0
+offset_top = -220.0
+offset_right = -300.0
+offset_bottom = -140.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.819608, 0.0588235, 0.882353, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 48
+theme_override_styles/fill = SubResource("StyleBoxFlat_nfm0g")
+script = ExtResource("1_0t5xw")
