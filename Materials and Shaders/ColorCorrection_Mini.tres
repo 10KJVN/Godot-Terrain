@@ -1,10 +1,10 @@
 [gd_resource type="VisualShader" load_steps=35 format=3 uid="uid://dbapk0dtj85oy"]
 
-[ext_resource type="Texture2D" uid="uid://djbqyeb5twhqq" path="res://textures/Gradient.tres" id="1_qx321"]
+[ext_resource type="Texture2D" uid="uid://djbqyeb5twhqq" path="res://textures/Gradients_Noise/Gradient.tres" id="1_ks1au"]
 
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_27r52"]
 linked_parent_graph_frame = 3
-texture = ExtResource("1_qx321")
+texture = ExtResource("1_ks1au")
 
 [sub_resource type="VisualShaderNodeMix" id="VisualShaderNodeMix_25xem"]
 default_input_values = [0, Vector3(0, 0, 0), 1, Vector3(1, 1, 1), 2, Vector3(0.5, 0.5, 0.5)]

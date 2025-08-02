@@ -1,7 +1,7 @@
 [gd_resource type="CompositorEffect" script_class="DrawTerrainMesh" load_steps=4 format=3 uid="uid://ccgy1cmj3d5ag"]
 
-[ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/ice-and-snow-ground-1024x1024.jpg" id="1_txatt"]
-[ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/0038-ground-texture-seamless.jpg" id="2_h6myj"]
+[ext_resource type="Texture2D" uid="uid://ciqe0sefuevsa" path="res://textures/Landscape/ice-and-snow-ground-1024x1024.jpg" id="1_txatt"]
+[ext_resource type="Texture2D" uid="uid://rdxot1nbcged" path="res://textures/Landscape/0038-ground-texture-seamless.jpg" id="2_h6myj"]
 [ext_resource type="Script" uid="uid://7n58awc2ols0" path="res://Scripts/draw_terrain.gd" id="3_x8xe8"]
 
 [resource]
@@ -13,7 +13,7 @@ needs_motion_vectors = false
 needs_normal_roughness = false
 script = ExtResource("3_x8xe8")
 regenerate = false
-camera_position = Vector3(148.417, 193.171, -5.85651)
+camera_position = Vector3(671.298, 209.782, -592.447)
 side_length = 2048
 mesh_scale = 0.5
 wireframe = false

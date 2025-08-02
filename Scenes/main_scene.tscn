@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_huasi"]
 [ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_m1efj"]
-[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_mai8y"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/Gradients_Noise/noise_texture.tres" id="3_mai8y"]
 [ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_76v2p"]
 [ext_resource type="CompositorEffect" uid="uid://ccgy1cmj3d5ag" path="res://Scenes/MockupTerrain.tres" id="5_drdnd"]
-[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="6_ioaeq"]
+[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://Materials and Shaders/water_material.tres" id="6_ioaeq"]
 [ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="7_7ewk0"]
 [ext_resource type="AudioStream" uid="uid://gkk1qn64jxgx" path="res://audio/LiveFastDieSlay 4Kaine - Kankan - SoundLoadMate.com.mp3" id="8_lhp3t"]
 

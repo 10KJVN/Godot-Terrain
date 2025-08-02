@@ -1,7 +1,7 @@
 [gd_resource type="VisualShader" load_steps=329 format=3 uid="uid://b5ptog53u0l54"]
 
-[ext_resource type="Texture2D" uid="uid://djbqyeb5twhqq" path="res://textures/Gradient.tres" id="1_3top0"]
-[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="2_1fm3n"]
+[ext_resource type="Texture2D" uid="uid://djbqyeb5twhqq" path="res://textures/Gradients_Noise/Gradient.tres" id="1_ssm2m"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/Gradients_Noise/noise_texture.tres" id="2_ssm2m"]
 
 [sub_resource type="VisualShaderNodeFrame" id="VisualShaderNodeFrame_4g1ve"]
 size = Vector2(3284, 2562)
@@ -165,7 +165,7 @@ operator = 1
 
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_g7rs7"]
 linked_parent_graph_frame = 13
-texture = ExtResource("1_3top0")
+texture = ExtResource("1_ssm2m")
 texture_type = 1
 
 [sub_resource type="VisualShaderNodeClamp" id="VisualShaderNodeClamp_bmobp"]
@@ -1346,7 +1346,7 @@ constant = Vector2(0, -5)
 [sub_resource type="VisualShaderNodeTexture" id="VisualShaderNodeTexture_mq180"]
 linked_parent_graph_frame = 599
 source = 5
-texture = ExtResource("2_1fm3n")
+texture = ExtResource("2_ssm2m")
 texture_type = 1
 
 [sub_resource type="VisualShaderNodeReroute" id="VisualShaderNodeReroute_wxkep"]

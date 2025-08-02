@@ -2,10 +2,10 @@
 
 [ext_resource type="Script" uid="uid://btn8i0m76hx2y" path="res://Scripts/Camera/debug_camera_controller.gd" id="1_byc5s"]
 [ext_resource type="Shader" uid="uid://b5ptog53u0l54" path="res://Materials and Shaders/ScreenEffects_Ultimate.tres" id="2_slapl"]
-[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/noise_texture.tres" id="3_0hl5s"]
+[ext_resource type="Texture2D" uid="uid://cfe8052fowf5i" path="res://textures/Gradients_Noise/noise_texture.tres" id="3_0hl5s"]
 [ext_resource type="Environment" uid="uid://bcff8k726n8mj" path="res://Scenes/Way2Geeked.tres" id="4_2r8jy"]
 [ext_resource type="Script" uid="uid://deo0gxkmk2ahd" path="res://addons/sky_3d/src/Sky3D.gd" id="7_byc5s"]
-[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://materials/water_material.tres" id="8_k1bn2"]
+[ext_resource type="Material" uid="uid://bb6i0fqo0hjiv" path="res://Materials and Shaders/water_material.tres" id="8_k1bn2"]
 [ext_resource type="Script" uid="uid://b4tkplvh7fq40" path="res://addons/sky_3d/src/Skydome.gd" id="8_slapl"]
 [ext_resource type="Script" uid="uid://cjmkcj8hwm7ts" path="res://addons/sky_3d/src/TimeOfDay.gd" id="9_0hl5s"]
 [ext_resource type="Script" uid="uid://c4mvk5x5up2dp" path="res://Scripts/mesh_connector.gd" id="9_nh4yt"]
