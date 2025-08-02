@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://c3n4f7gefvqde"]
+[gd_scene load_steps=3 format=3 uid="uid://c3n4f7gefvqde"]
 
 [ext_resource type="Script" uid="uid://daxhwwyjy3ufx" path="res://Scripts/SceneContorller.gd" id="1_uv48w"]
+[ext_resource type="PackedScene" uid="uid://bhlg71m4xf2hn" path="res://Scenes/loading_screen.tscn" id="2_ejqoj"]
 
 [node name="SceneController" type="Node"]
 script = ExtResource("1_uv48w")
+loading_screen = ExtResource("2_ejqoj")
